@@ -1,0 +1,233 @@
+#nodemorph-tool {
+    padding: 20px;
+}
+
+.nodemorph-Icon--ninja {
+    background-image: url('../icons/ninja-head.svg');
+    background-size: contain;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+}
+
+.coral-Card .nodemorph-Icon--ninja {
+    vertical-align: middle;
+}
+
+.foundation-layout-panel-bodywrapper {
+    padding: 3rem;
+
+    .coral-Form-fieldset {
+        margin: 1.5rem 1rem 1.625rem 1rem;
+    }
+
+    coral-panel-content {
+
+        #matchProperty {
+            width: 100%;
+        }
+
+        .nodemorph-form {
+            border-bottom: 1px solid lightgray;
+            margin-bottom: 2rem;
+        }
+
+        #search-result-count {
+            align-items: center;
+            display: flex;
+            font-size: 1rem;
+            font-weight: bold;
+            gap: 1rem;
+            justify-content: space-between;
+            margin: 0 0 1rem 0;
+
+            #result-text {
+                padding-top: .5rem;
+            }
+
+            #export-csv-btn {
+                margin-right: 1rem;
+                padding: .5rem 1rem;
+            }
+        }
+
+        .coral-Table-row {
+            //placed here outside of .nodemorph-results-table to prevent too much specificity overriding the hover style
+            &:nth-child(2n) {
+                .coral-Table-cell {
+                    background-color: #f6f6f6;
+                }
+            }
+        }
+
+        .nodemorph-results-table {
+
+            .coral-Table-row {
+
+                .coral-Table-headerCell, .coral-Table-cell {
+                    width: 20%;
+
+                    &:first-child {
+                        width: 60%;
+                    }
+                }
+            }
+
+            .coral-Table-row[title] {
+                white-space: pre;
+            }
+        }
+
+        .coral-Form-fieldwrapper {
+            margin-bottom: 1rem;
+
+            .coral-Form-fieldlabel {
+                display: block;
+                margin-bottom: .5rem;
+            }
+
+            span {
+                display: inline-block;
+
+                &.path-browser-container {
+                    width: 100%;
+
+                    .coral-InputGroup {
+                        width: 100%;
+                    }
+                }
+
+                .js-coral-pathbrowser-input {
+                    float: left;
+                    width: ~"calc(100% - 38px)";
+                }
+
+                .js-coral-pathbrowser-button {
+                    float: left;
+                }
+            }
+
+            &#property-name-wrapper, &.operation-fields, .match-fields {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.4s ease-out;
+                margin-bottom: 0;
+
+                &.visible {
+                    margin-bottom: 1rem;
+                }
+            }
+
+            &#property-name-wrapper {
+                &.visible {
+                    max-height: 100px;
+                }
+            }
+
+            &.operation-fields {
+                &#copy-type-fields.visible, &#match-type-fields.visible {
+                    max-height: 120px;
+                    overflow: visible;
+                    position: relative;
+                }
+
+                &#add-fields.visible {
+                    max-height: 400px;
+                }
+
+                &#delete-fields.visible {
+                    max-height: 150px;
+                }
+
+                &#replace-fields.visible {
+                    max-height: 250px;
+                }
+
+                &#copy-detail-fields.visible {
+                    max-height: 200px;
+                }
+
+                input {
+                    margin-bottom: .5rem;
+                }
+            }
+
+            coral-select {
+
+                .coral3-Overlay.coral3-Select-overlay.is-open {
+                    top: 37px !important;
+                }
+            }
+
+            &#add-fields {
+
+                .match-property-fields, .match-node-fields {
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.4s ease-out;
+
+                    &.visible {
+                        max-height: 150px;
+                    }
+                }
+
+                .property-list {
+
+                    .property-row {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        margin-bottom: 0.5rem;
+
+                        input {
+                            flex-grow: 1;
+                        }
+                    }
+                }
+
+                #add-prop {
+                    display: block;
+                    float: right;
+                    margin-top: 0.5rem;
+                }
+
+                &.visible {
+                    max-height: 400px;
+                    padding-bottom: 1rem;
+                }
+            }
+        }
+
+        .coral-table-row {
+            display: flex;
+            flex-direction: row;
+
+            &> div {
+                width: 100%;
+            }
+
+            input {
+
+                width: 100%;
+            }
+        }
+
+        .coral-table-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .action-button-container {
+            display: flex;
+            justify-content: end;
+
+            button {
+                width: 8rem;
+            }
+        }
+
+        .coral-Well {
+            transition: margin-top 0.4s ease-out;
+        }
+    }
+}

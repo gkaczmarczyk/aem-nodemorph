@@ -1,0 +1,262 @@
+<html>
+    <head>
+        <title>AEM NodeMorph Tool</title>
+        <sly data-sly-use.clientLib="${'/libs/granite/sightly/templates/clientlib.html'}"
+             data-sly-call="${clientLib.all @ categories='nodemorph.admin.tool'}"/>
+        <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+        <meta class="granite-omnisearch-src" data-granite-omnisearch-src="/mnt/overlay/granite/ui/content/shell/omnisearch.html" data-granite-omnisearch-search-url="/aem/search.html">
+    </head>
+    <body class="coral--light">
+        <coral-shell>
+            <coral-shell-header role="region" aria-label="Header Bar" class="coral--dark granite-shell-header coral3-Shell-header">
+                <coral-shell-header-home class="globalnav-toggle" data-globalnav-toggle-href="/mnt/overlay/granite/ui/content/shell/globalnav.html" role="heading" aria-level="2">
+                    <a is="coral-shell-homeanchor" icon="adobeExperienceManagerColor" href="#" id="globalNavHeader" aria-expanded="false" class="coral3-Shell-homeAnchor">
+                        <coral-icon class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--sizeM coral3-Icon--adobeExperienceManagerColor" icon="adobeExperienceManagerColor" size="M" autoarialabel="on" role="img" aria-label="adobe experience manager color"></coral-icon>
+                        <coral-shell-homeanchor-label>Adobe Experience Manager</coral-shell-homeanchor-label>
+                    </a>
+                </coral-shell-header-home>
+<!--                <coral-shell-header-actions>-->
+<!--                    <coral-shell-menubar class="coral3-Shell-menubar" role="list">-->
+<!--                        <coral-shell-menubar-item id="granite-omnisearch-trigger" title="Search" icon="search" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;search&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" class="coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" role="listitem">-->
+<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
+<!--                        </coral-shell-menubar-item>-->
+<!--                        <coral-shell-menubar-item class="foundation-toggleable-control coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="Solutions" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/solutionswitcher.html" icon="apps" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;solutions&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" role="listitem">-->
+<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
+<!--                        </coral-shell-menubar-item>-->
+<!--                        <coral-shell-menubar-item class="foundation-toggleable-control coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="Help" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/help.html" icon="helpCircle" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;help&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" role="listitem">-->
+<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
+<!--                        </coral-shell-menubar-item>-->
+<!--                        <coral-shell-menubar-item title="Inbox" icon="bell" haspopup="dialog" class="granite-shell-badge coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" data-granite-shell-badge-src="/mnt/overlay/granite/ui/content/shell/header/actions/pulse.data.json" data-granite-shell-badge-console="/aem/inbox" data-granite-shell-badge-user="admin" data-granite-shell-badge-label-template="Inbox : {{count}} Notifications" role="listitem" badge="7" aria-label="Inbox : 7 Notifications">-->
+<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
+<!--                        </coral-shell-menubar-item>-->
+<!--                        <coral-shell-menubar-item data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;user&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" class="foundation-toggleable-control granite-user-icon coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="User" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/userproperties.html" icon="userCircleColor" iconsize="M" haspopup="dialog" role="listitem">-->
+<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
+<!--                        </coral-shell-menubar-item>-->
+<!--                    </coral-shell-menubar>-->
+<!--                </coral-shell-header-actions>-->
+                <coral-shell-header-content></coral-shell-header-content>
+            </coral-shell-header>
+
+            <coral-shell-content role="main">
+                <div id="granite-shell-content" class="foundation-layout-panel">
+                    <div class="foundation-layout-panel-header">
+                        <div id="granite-shell-actionbar" class="granite-actionbar foundation-collection-actionbar"
+                             data-foundation-collection-actionbar-target="#cq-siteadmin-admin-childpages">
+                            <div class="granite-actionbar-centerwrapper">
+                                <div class="granite-actionbar-center">
+                                    <span class="granite-title" role="heading" aria-level="1">AEM Node Morph Tool</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="foundation-layout-panel-bodywrapper">
+                        <div class="foundation-layout-panel-body">
+                            <coral-tabview>
+                                <coral-tablist target="nodemorph-tabs">
+                                    <coral-tab id="search-tab" selected>Search</coral-tab>
+                                    <coral-tab id="update-tab">Update</coral-tab>
+                                </coral-tablist>
+                                <coral-panelstack id="nodemorph-tabs">
+                                    <!-- Search Tab -->
+                                    <coral-panel selected>
+                                        <div class="coral--light coral-Well" style="padding: 20px;">
+                                            <form id="nodemorph-search-form" class="coral-Form nodemorph-form">
+                                                <section class="coral-Form-fieldset">
+                                                    <div class="coral-Form-fieldwrapper">
+                                                        <span class="path-browser-container" data-init="pathbrowser" data-root-path="/content" data-option-loader="/content/"
+                                                              data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html?predicate=hierarchyNotFile" data-crumb-root="">
+                                                            <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Path to Search</label>
+                                                            <div class="coral-InputGroup">
+                                                                <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input path_input"
+                                                                       id="nodepath" placeholder="Node Path (e.g., /content/my-page/jcr:content)" type="text" value="/content"
+                                                                       autocomplete="off" aria-owns="coral-1">
+                                                                <span class="coral-InputGroup-button">
+                                                                    <button class="coral-Button coral-Button--secondary coral-Button--square js-coral-pathbrowser-button" type="button" title="Browse">
+                                                                        <i class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                    <div class="coral-table-row">
+                                                        <coral-checkbox value="on" name="matchProperty" id="matchProperty">Match Property</coral-checkbox>
+                                                        <div class="coral-table-column">
+                                                            <div class="match-property-container">
+                                                                <div class="coral-Form-fieldwrapper" id="property-name-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                    <input is="coral-textfield" name="propertyName" id="property-name-field" placeholder="e.g., sling:resourceType"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="query-container">
+                                                                <div class="coral-Form-fieldwrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3" id="query-label">Search for Node</label>
+                                                                    <input is="coral-textfield" name="query" id="query-field" placeholder="Enter node name (e.g., mynode_*)"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="coral-Well">
+                                                        <coral-checkbox value="on" name="pageOnly">Restrict to cq:Page nodes</coral-checkbox>
+                                                        <coral-checkbox value="on" name="verbose">Verbose Output</coral-checkbox>
+                                                    </div>
+                                                    <div class="coral-Form-fieldwrapper action-button-container">
+                                                        <button is="coral-button" type="submit" variant="primary" icon="search" iconsize="S">Search</button>
+                                                    </div>
+                                                </section>
+                                            </form>
+
+                                            <div id="search-result-count" class="coral-Form-fieldwrapper">
+                                                <span id="result-text"></span>
+                                                <button is="coral-button" id="export-csv-btn" variant="secondary" iconsize="S" style="display: none; margin-left: 1rem;">
+                                                    <coral-icon icon="download" size="S"></coral-icon>
+                                                    Export CSV
+                                                </button>
+                                            </div>
+                                            <table class="coral-Table coral-Table--hover nodemorph-results-table" id="nodemorph-search-results" style="display: none;">
+                                                <thead class="coral-Table-header">
+                                                <tr class="coral-Table-row">
+                                                    <th class="coral-Table-headerCell">Path</th>
+                                                    <th class="coral-Table-headerCell">Title</th>
+                                                    <th class="coral-Table-headerCell">Type</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="coral-Table-body"></tbody>
+                                            </table>
+                                        </div>
+                                    </coral-panel>
+                                    <!-- Update Tab -->
+                                    <coral-panel>
+                                        <div class="coral--light coral-Well" style="padding: 20px;">
+                                            <form id="nodemorph-update-form" class="coral-Form nodemorph-form">
+                                                <section class="coral-Form-fieldset">
+                                                    <!-- Pathbrowser -->
+                                                    <div class="coral-Form-fieldwrapper">
+                                                        <span class="path-browser-container" data-init="pathbrowser" data-root-path="/content" data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html?predicate=hierarchyNotFile">
+                                                            <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Path to Update</label>
+                                                            <div class="coral-InputGroup">
+                                                                <input class="coral-InputGroup-input coral-Textfield js-coral-pathbrowser-input" name="path" id="update-path" placeholder="e.g., /content/my-page" type="text" value="/content" autocomplete="off">
+                                                                <span class="coral-InputGroup-button">
+                                                                    <button class="coral-Button coral-Button--secondary coral-Button--square js-coral-pathbrowser-button" type="button" title="Browse">
+                                                                        <i class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                    <div class="coral-table-row">
+                                                        <div class="coral-table-column">
+                                                            <!-- Operation Selector -->
+                                                            <div class="coral-Form-fieldwrapper">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Operation</label>
+                                                                <coral-select name="operation" id="update-operation" placeholder="Choose an Operation">
+                                                                    <coral-select-item value="add">Add/Update Properties</coral-select-item>
+                                                                    <coral-select-item value="delete">Delete Properties</coral-select-item>
+                                                                    <coral-select-item value="replace">Replace Properties</coral-select-item>
+                                                                    <coral-select-item value="copy">Copy</coral-select-item>
+                                                                </coral-select>
+                                                            </div>
+                                                            <!-- Match Type (Add/Update) -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="match-type-fields">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Match Type</label>
+                                                                <coral-select name="matchType" id="match-type">
+                                                                    <coral-select-item value="property" selected>Property</coral-select-item>
+                                                                    <coral-select-item value="node">Node</coral-select-item>
+                                                                </coral-select>
+                                                            </div>
+                                                            <!-- Copy Fields -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="copy-type-fields">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Copy Type</label>
+                                                                <coral-select name="copyType" id="copy-type">
+                                                                    <coral-select-item value="node">Node</coral-select-item>
+                                                                    <coral-select-item value="nestedNode">Nested Node</coral-select-item>
+                                                                    <coral-select-item value="property">Property</coral-select-item>
+                                                                    <coral-select-item value="propertyToPath">Property to Path</coral-select-item>
+                                                                </coral-select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="coral-table-column">
+                                                            <!-- Add/Update Fields -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="add-fields">
+                                                                <div class="match-property-fields match-fields">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Property (Optional)</label>
+                                                                    <input is="coral-textfield" name="ifProp" placeholder="e.g., sling:resourceType" />
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Value (Optional)</label>
+                                                                    <input is="coral-textfield" name="ifValue" placeholder="e.g., cq:PageContent" />
+                                                                </div>
+                                                                <div class="match-node-fields match-fields">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Node Name</label>
+                                                                    <input is="coral-textfield" name="jcrNodeName" placeholder="e.g., jcr:content" />
+                                                                </div>
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Properties</label>
+                                                                <div class="property-list">
+                                                                    <div class="property-row">
+                                                                        <input is="coral-textfield" name="properties[]" placeholder="key=value" />
+                                                                        <button is="coral-button" class="remove-prop" variant="quiet" icon="delete" iconsize="S" style="display: none;"></button>
+                                                                    </div>
+                                                                </div>
+                                                                <button is="coral-button" id="add-prop" variant="secondary" icon="add" iconsize="S" style="float: right; margin-top: 0.5rem;">Add Property</button>
+                                                            </div>
+                                                            <!-- Delete Fields -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="delete-fields">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Names</label>
+                                                                <input is="coral-textfield" name="propNames" placeholder="key1,key2" />
+                                                            </div>
+                                                            <!-- Replace Fields -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="replace-fields">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                <input is="coral-textfield" name="propName" placeholder="e.g., sling:resourceType" />
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Find Value</label>
+                                                                <input is="coral-textfield" name="find" placeholder="e.g., oldValue" />
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Replace With</label>
+                                                                <input is="coral-textfield" name="replace" placeholder="e.g., newValue" />
+                                                            </div>
+                                                            <!-- Copy Fields -->
+                                                            <div class="coral-Form-fieldwrapper operation-fields" id="copy-detail-fields">
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Source</label>
+                                                                <input is="coral-textfield" name="source" placeholder="e.g., node1 or propName" />
+                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Target</label>
+                                                                <input is="coral-textfield" name="target" placeholder="e.g., node2 or /new/path" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Checkboxes -->
+                                                    <div class="coral-Well">
+                                                        <coral-checkbox name="pageOnly" value="true">Restrict to cq:Page nodes only</coral-checkbox>
+                                                        <coral-checkbox name="dryRun" value="true">Preview changes only</coral-checkbox>
+                                                    </div>
+                                                    <!-- Submit -->
+                                                    <div class="coral-Form-fieldwrapper action-button-container">
+                                                        <button is="coral-button" type="submit" variant="primary" icon="play" iconsize="S">Run</button>
+                                                    </div>
+                                                </section>
+                                            </form>
+                                            <div id="update-result-count" class="coral-Form-fieldwrapper">
+                                                <span id="update-result-text"></span>
+                                            </div>
+                                            <table class="coral-Table coral-Table--hover nodemorph-results-table" id="nodemorph-update-results" style="display: none;">
+                                                <thead class="coral-Table-header">
+                                                <tr class="coral-Table-row">
+                                                    <th class="coral-Table-headerCell">Path</th>
+                                                    <th class="coral-Table-headerCell">Action</th>
+                                                    <th class="coral-Table-headerCell">Status</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="coral-Table-body"></tbody>
+                                            </table>
+                                        </div>
+                                    </coral-panel>
+                                </coral-panelstack>
+                            </coral-tabview>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="overlay">
+                    <div class="cv-spinner">
+                        <span class="spinner"></span>
+                    </div>
+                </div>
+            </coral-shell-content>
+        </coral-shell>
+    </body>
+</html>
