@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.api.servlets.ServletResolverConstants;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -19,11 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component(service = Servlet.class, property = {
-        ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/nodemorph/update",
-        ServletResolverConstants.SLING_SERVLET_METHODS + "=POST"
-})
+@Component(service = Servlet.class)
+@SlingServletResourceTypes(
+        resourceTypes = "aemnodemorph/admin/components/aemnodemorph",
+        selectors = "update",
+        extensions = "json",
+        methods = "POST"
+)
 public class UpdateServlet extends SlingAllMethodsServlet {
+
+    private static final long serialVersionUID = -8752096293782235901L;
+
     private static final Logger LOG = LoggerFactory.getLogger(UpdateServlet.class);
 
     @Reference

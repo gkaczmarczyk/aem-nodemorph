@@ -3,6 +3,7 @@ package co.acu.nodemorph.core.services.impl;
 import co.acu.nodemorph.core.services.UpdateService;
 import co.acu.nodemorph.core.dto.UpdateRequest;
 import co.acu.nodemorph.core.dto.UpdateResult;
+import co.acu.nodemorph.core.dto.NodeProperty;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
@@ -41,17 +42,27 @@ public class UpdateServiceImpl implements UpdateService {
             queryParams.put("path", request.path);
             if (request.pageOnly) {
                 queryParams.put("type", "cq:Page");
+            } else if ("property".equals(request.matchType) && request.ifProp != null && !request.ifProp.isEmpty()) {
+                queryParams.put("property", request.ifProp);
+                queryParams.put("property.value", request.ifValue);
             }
             queryParams.put("p.limit", "-1");
 
             Query query = queryBuilder.createQuery(PredicateGroup.create(queryParams), session);
             Iterator<Resource> nodeIterator = query.getResult().getResources();
             List<Resource> nodes = new ArrayList<>();
-            nodeIterator.forEachRemaining(nodes::add); // Replace stream() for compatibility
+            nodeIterator.forEachRemaining(nodes::add);
+
+            LOG.info("Query found {} nodes", nodes.size());
 
             // Process Add Operation
-            if ("add".equals(request.operation) && request.properties != null) {
-                Map<String, Object> propsToAdd = parseProperties(request.properties);
+            if ("add".equals(request.operation)) {
+                List<NodeProperty> propsToAdd = request.getUpdateProperties();
+
+                if (propsToAdd.isEmpty()) {
+                    results.add(new UpdateResult(request.path, "No properties to add", "Skipped"));
+                    return results;
+                }
 
                 for (Resource node : nodes) {
                     Resource target = request.pageOnly ? node.getChild("jcr:content") : node;
@@ -67,20 +78,16 @@ public class UpdateServiceImpl implements UpdateService {
                     }
 
                     boolean matches = true;
-                    if ("property".equals(request.matchType) && request.ifProp != null && !request.ifProp.isEmpty()) {
-                        ValueMap currentProps = target.getValueMap();
-                        String currentValue = currentProps.get(request.ifProp, String.class);
-                        matches = request.ifValue.equals(currentValue);
-                    } else if ("node".equals(request.matchType) && request.nodeName != null && !request.nodeName.isEmpty()) {
+                    if ("node".equals(request.matchType) && request.nodeName != null && !request.nodeName.isEmpty()) {
                         matches = target.getName().equals(request.nodeName);
                     }
                     if (!matches) {
                         continue;
                     }
 
-                    for (Map.Entry<String, Object> entry : propsToAdd.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
+                    for (NodeProperty prop : propsToAdd) {
+                        String key = prop.getKey();
+                        Object value = prop.getValue();
                         String action = String.format("Set %s=%s", key, value);
                         if (request.dryRun) {
                             results.add(new UpdateResult(path, action, "Pending"));
@@ -106,33 +113,6 @@ public class UpdateServiceImpl implements UpdateService {
         }
 
         return results;
-    }
-
-    private Map<String, Object> parseProperties(String properties) {
-        Map<String, Object> props = new HashMap<>();
-        if (properties == null || properties.trim().isEmpty()) return props;
-
-        String[] lines = properties.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            String[] parts = line.split("=", 2);
-            if (parts.length == 2) {
-                String key = parts[0].trim();
-                String value = parts[1].trim();
-                if (value.startsWith("[") && value.endsWith("]")) {
-                    String[] values = value.substring(1, value.length() - 1).split(",");
-                    for (int i = 0; i < values.length; i++) {
-                        values[i] = values[i].trim();
-                    }
-                    props.put(key, values);
-                } else {
-                    props.put(key, value);
-                }
-            }
-        }
-        return props;
     }
 
 }
