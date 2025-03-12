@@ -3,6 +3,6 @@
     jcr:primaryType="nt:unstructured"
     jcr:title="AEMNodeMorph Tool"
     icon="fileWorkflow"
-    href="/apps/aemnodemorph/admin/content/aemnodemorph.html"
+    href="/apps/aemnodemorph/admin/content/nodemorph.html"
     id="aemnodemorph"
     target="_blank"/>

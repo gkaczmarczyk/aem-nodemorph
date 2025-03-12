@@ -7,7 +7,8 @@ import com.google.gson.Gson;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.apache.sling.servlets.annotations.SlingServletPaths;
+import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -20,23 +21,28 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component(service = Servlet.class)
-@SlingServletResourceTypes(
-        resourceTypes = "aemnodemorph/admin/components/aemnodemorph",
-        selectors = "update",
-        extensions = "json",
-        methods = "POST"
-)
+@SlingServletPaths("/bin/nodemorph/update")
 public class UpdateServlet extends SlingAllMethodsServlet {
 
-    private static final long serialVersionUID = -8752096293782235901L;
+    private static final long serialVersionUID = 8639876788048675540L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateServlet.class);
 
     @Reference
     private UpdateService updateService;
 
+    @Reference
+    private SlingSettingsService slingSettings;
+
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+        if (!slingSettings.getRunModes().contains("author")) {
+            LOG.warn("UpdateServlet accessed on non-author instance");
+            response.sendError(SlingHttpServletResponse.SC_FORBIDDEN, "Not allowed");
+            return;
+        }
+
+        LOG.info("UpdateServlet hit with params: {}", request.getParameterMap());
         Map<String, String> params = request.getParameterMap().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
         UpdateRequest updateRequest = new UpdateRequest(params, request.getResourceResolver());

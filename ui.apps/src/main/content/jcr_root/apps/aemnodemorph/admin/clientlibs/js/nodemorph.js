@@ -230,7 +230,7 @@
                     break;
             }
 
-            $.post('/apps/aemnodemorph/admin/content/aemnodemorph.update.json', formData, function(data) {
+            $.post('/bin/nodemorph/update', formData, function(data) {
                 $('#update-result-text').text(`Affected ${data.total} nodes`);
                 const tbody = $('#nodemorph-update-results .coral-Table-body').empty();
                 $('#nodemorph-update-results').css('display', data.total > 0 ? 'table' : 'none')

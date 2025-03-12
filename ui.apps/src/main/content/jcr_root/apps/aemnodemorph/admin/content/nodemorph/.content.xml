@@ -3,6 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        sling:resourceType="aemnodemorph/admin/components/aemnodemorph"
+        sling:resourceType="aemnodemorph/admin/components/nodemorph"
         jcr:title="NodeMorph Tool"/>
 </jcr:root>
