@@ -230,26 +230,56 @@
                     break;
             }
 
-            $.post('/bin/nodemorph/update', formData, function(data) {
-                $('#update-result-text').text(`Affected ${data.total} nodes`);
-                const tbody = $('#nodemorph-update-results .coral-Table-body').empty();
-                $('#nodemorph-update-results').css('display', data.total > 0 ? 'table' : 'none')
-                data.actions.forEach(action => {
-                    const row = `<tr class="coral-Table-row">
-                <td class="coral-Table-cell">${action.path}</td>
-                <td class="coral-Table-cell">${action.action}</td>
-                <td class="coral-Table-cell">${action.status}</td>
-            </tr>`;
-                    tbody.append(row);
-                });
-            }).fail(function(xhr) {
-                $('#update-result-text').text('Update failed')
-                // $('#export-csv-btn').css('display', 'none')
-                $('#nodemorph-update-results').css('display', 'none')
-                new Coral.Alert().set({
-                    variant: 'error', header: 'Update Failed', content: { innerHTML: xhr.statusText }
-                }).display()
-            });
+            $.post('/bin/nodemorph/update', formData)
+                .done(function(data) {
+                    if (data.actions && data.actions.length > 0 && data.actions.some(action => action.status === "Failed")) {
+                        $('#update-result-text').text('Update failed')
+                        $('#nodemorph-update-results').css('display', 'none')
+                        let errorMessage = 'An unexpected error occurred.'
+                        const failedAction = data.actions.find(action => action.status === "Failed")
+                        if (failedAction && failedAction.message) {
+                            errorMessage = failedAction.message
+                        }
+                        const dialog = new Coral.Dialog().set({
+                            id: 'update-error-dialog',
+                            variant: 'error',
+                            header: { innerHTML: 'Update Failed' },
+                            content: { innerHTML: errorMessage },
+                            footer: {
+                                innerHTML: '<button is="coral-button" variant="primary" coral-close>OK</button>'
+                            }
+                        })
+                        document.body.appendChild(dialog)
+                        dialog.show()
+                    } else {
+                        $('#update-result-text').text(`Affected ${data.total} node${data.total === 1 ? '' : 's'}`)
+                        const tbody = $('#nodemorph-update-results .coral-Table-body').empty()
+                        $('#nodemorph-update-results').css('display', data.total > 0 ? 'table' : 'none')
+                        data.actions.forEach(action => {
+                            const row = `<tr class="coral-Table-row">
+                                <td class="coral-Table-cell">${action.path}</td>
+                                <td class="coral-Table-cell">${action.action}</td>
+                                <td class="coral-Table-cell">${action.status}</td>
+                            </tr>`
+                            tbody.append(row)
+                        });
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#update-result-text').text('Update failed')
+                    $('#nodemorph-update-results').css('display', 'none')
+                    const dialog = new Coral.Dialog().set({
+                        id: 'update-error-dialog',
+                        variant: 'error',
+                        header: { innerHTML: 'Update Failed' },
+                        content: { innerHTML: xhr.responseText || 'Server error occurred. Check logs.' },
+                        footer: {
+                            innerHTML: '<button is="coral-button" variant="primary" coral-close>OK</button>'
+                        }
+                    })
+                    document.body.appendChild(dialog)
+                    dialog.show()
+                })
         })
 
         // Update Tab Functionality

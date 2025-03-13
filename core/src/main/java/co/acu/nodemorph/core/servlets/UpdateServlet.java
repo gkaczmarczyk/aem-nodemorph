@@ -51,12 +51,15 @@ public class UpdateServlet extends SlingAllMethodsServlet {
         try {
             results = updateService.processUpdate(updateRequest);
         } catch (Exception e) {
-            LOG.error("Update failed", e);
-            results = List.of(new UpdateResult(updateRequest.path, "Error: " + e.getMessage(), "Failed"));
+            LOG.error("Update failed unexpectedly", e);
+            results = List.of(new UpdateResult(updateRequest.path, "Error: Unexpected failure", "Failed", e.getMessage()));
         }
 
+        int successfulTotal = (int) results.stream()
+                .filter(r -> !"Failed".equals(r.status))
+                .count();
         response.setContentType("application/json");
-        response.getWriter().write(new Gson().toJson(new UpdateResponse(results.size(), results)));
+        response.getWriter().write(new Gson().toJson(new UpdateResponse(successfulTotal, results)));
     }
 
     private static class UpdateResponse {

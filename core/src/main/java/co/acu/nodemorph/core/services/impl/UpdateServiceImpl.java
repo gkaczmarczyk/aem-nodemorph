@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component(service = UpdateService.class)
 public class UpdateServiceImpl implements UpdateService {
@@ -49,18 +48,29 @@ public class UpdateServiceImpl implements UpdateService {
             } else if ("node".equals(request.matchType) && request.jcrNodeName != null && !request.jcrNodeName.isEmpty()) {
                 queryParams.put("nodename", request.jcrNodeName);
                 queryParams.put("type", "nt:base");
+            } else if ("replace".equals(request.operation) && request.propName != null && !request.propName.isEmpty()) {
+                if (request.propName.contains("/") || request.propName.contains(" ")) {
+                    throw new IllegalArgumentException("Invalid property name: " + request.propName + " (slashes or spaces not allowed)");
+                }
+                queryParams.put("type", request.pageOnly ? "cq:Page" : "nt:base");
+                queryParams.put("property", request.propName);
+                queryParams.put("property.value", request.find);
             }
             queryParams.put("p.limit", "-1");
 
             PredicateGroup predicate = PredicateGroup.create(queryParams);
             Query query = queryBuilder.createQuery(predicate, session);
-            Iterator<Resource> nodeIterator = query.getResult().getResources();
+
+            Iterator<Resource> nodeIterator;
+            try {
+                nodeIterator = query.getResult().getResources();
+            } catch (Exception e) {
+                throw new RuntimeException("Query execution failed", e); // Wrap and rethrow
+            }
             List<Resource> nodes = new ArrayList<>();
             nodeIterator.forEachRemaining(nodes::add);
 
-            //
             // Process Operations
-            //
             if ("add".equals(request.operation)) {
                 List<NodeProperty> propsToAdd = request.getUpdateProperties();
 
@@ -110,15 +120,59 @@ public class UpdateServiceImpl implements UpdateService {
                         }
                     }
                 }
+            } else if ("replace".equals(request.operation)) {
+                if (request.propName == null || request.find == null || request.replace == null) {
+                    results.add(new UpdateResult(request.path, "Error: Missing replace parameters", "Failed"));
+                    return results;
+                }
 
-                if (!request.dryRun && !results.stream().allMatch(r -> "Failed".equals(r.status))) {
-                    resolver.commit();
+                for (Resource node : nodes) {
+                    Resource target = request.pageOnly ? node.getChild("jcr:content") : node;
+                    if (target != null && target.getResourceType().equals("cq:Page")) {
+                        target = target.getChild("jcr:content");
+                    }
+                    if (target == null) {
+                        results.add(new UpdateResult(node.getPath(), "Error: No modifiable target node", "Failed"));
+                        continue;
+                    }
+
+                    String path = target.getPath();
+                    ModifiableValueMap props = target.adaptTo(ModifiableValueMap.class);
+                    if (props == null) {
+                        results.add(new UpdateResult(path, "Error: Cannot modify node", "Failed"));
+                        continue;
+                    }
+
+                    Object currentValue = props.get(request.propName);
+                    if (currentValue != null && currentValue.toString().equals(request.find)) {
+                        String action = String.format("Replace %s: %s → %s", request.propName, request.find, request.replace);
+                        if (request.dryRun) {
+                            results.add(new UpdateResult(path, action, "Pending"));
+                        } else {
+                            props.put(request.propName, request.replace);
+                            if (target.getResourceType().equals("cq:PageContent")) {
+                                props.put("cq:lastModified", Calendar.getInstance());
+                                props.put("cq:lastModifiedBy", resolver.getUserID());
+                            }
+                            results.add(new UpdateResult(path, action, "Done"));
+                        }
+                    }
                 }
             }
 
-        } catch (PersistenceException e) {
-            LOG.error("Failed to commit changes", e);
-            results.add(new UpdateResult(request.path, "Error: Save failed", "Failed"));
+            if (!request.dryRun && !results.stream().allMatch(r -> "Failed".equals(r.status))) {
+                resolver.commit();
+            }
+
+        } catch (IllegalArgumentException e) {
+            LOG.error("Invalid input", e);
+            results.add(new UpdateResult(request.path, "Error: Invalid input", "Failed", e.getMessage()));
+        } catch (PersistenceException pe) {
+            LOG.error("Failed to commit changes", pe);
+            results.add(new UpdateResult(request.path, "Error: Save failed", "Failed", pe.getMessage()));
+        } catch (Exception e) {
+            LOG.error("A node operation error has occurred", e);
+            results.add(new UpdateResult(request.path, "Error: Unable to complete operation", "Failed", e.getMessage()));
         }
 
         return results;
