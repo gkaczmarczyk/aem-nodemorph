@@ -22,7 +22,7 @@ public class UpdateRequest {
     public String source;
     public String target;
     public String matchType;
-    public String nodeName;
+    public String jcrNodeName;
     public ResourceResolver resolver;
 
     private static final String[] WRITABLE_PROPERTIES = {"properties"};
@@ -44,7 +44,7 @@ public class UpdateRequest {
         this.source = params.get("source");
         this.target = params.get("target");
         this.matchType = params.get("matchType");
-        this.nodeName = params.get("nodeName");
+        this.jcrNodeName = params.get("jcrNodeName");
         this.resolver = resolver;
     }
 

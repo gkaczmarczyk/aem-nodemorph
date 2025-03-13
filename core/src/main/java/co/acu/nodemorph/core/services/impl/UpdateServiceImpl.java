@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component(service = UpdateService.class)
 public class UpdateServiceImpl implements UpdateService {
@@ -37,7 +38,6 @@ public class UpdateServiceImpl implements UpdateService {
         try {
             Session session = resolver.adaptTo(Session.class);
 
-            // Build Query
             Map<String, String> queryParams = new HashMap<>();
             queryParams.put("path", request.path);
             if (request.pageOnly) {
@@ -45,17 +45,22 @@ public class UpdateServiceImpl implements UpdateService {
             } else if ("property".equals(request.matchType) && request.ifProp != null && !request.ifProp.isEmpty()) {
                 queryParams.put("property", request.ifProp);
                 queryParams.put("property.value", request.ifValue);
+                queryParams.put("type", "nt:base");
+            } else if ("node".equals(request.matchType) && request.jcrNodeName != null && !request.jcrNodeName.isEmpty()) {
+                queryParams.put("nodename", request.jcrNodeName);
+                queryParams.put("type", "nt:base");
             }
             queryParams.put("p.limit", "-1");
 
-            Query query = queryBuilder.createQuery(PredicateGroup.create(queryParams), session);
+            PredicateGroup predicate = PredicateGroup.create(queryParams);
+            Query query = queryBuilder.createQuery(predicate, session);
             Iterator<Resource> nodeIterator = query.getResult().getResources();
             List<Resource> nodes = new ArrayList<>();
             nodeIterator.forEachRemaining(nodes::add);
 
-            LOG.info("Query found {} nodes", nodes.size());
-
-            // Process Add Operation
+            //
+            // Process Operations
+            //
             if ("add".equals(request.operation)) {
                 List<NodeProperty> propsToAdd = request.getUpdateProperties();
 
@@ -66,7 +71,11 @@ public class UpdateServiceImpl implements UpdateService {
 
                 for (Resource node : nodes) {
                     Resource target = request.pageOnly ? node.getChild("jcr:content") : node;
+                    if (target != null && target.getResourceType().equals("cq:Page")) {
+                        target = target.getChild("jcr:content");
+                    }
                     if (target == null) {
+                        results.add(new UpdateResult(node.getPath(), "Error: No modifiable target node", "Failed"));
                         continue;
                     }
 
@@ -78,8 +87,8 @@ public class UpdateServiceImpl implements UpdateService {
                     }
 
                     boolean matches = true;
-                    if ("node".equals(request.matchType) && request.nodeName != null && !request.nodeName.isEmpty()) {
-                        matches = target.getName().equals(request.nodeName);
+                    if ("node".equals(request.matchType) && request.jcrNodeName != null && !request.jcrNodeName.isEmpty()) {
+                        matches = node.getName().equals(request.jcrNodeName);
                     }
                     if (!matches) {
                         continue;

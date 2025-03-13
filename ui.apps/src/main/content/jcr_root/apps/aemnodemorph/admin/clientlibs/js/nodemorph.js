@@ -211,7 +211,7 @@
                         formData.ifProp = $('input[name="ifProp"]').val()
                         formData.ifValue = $('input[name="ifValue"]').val()
                     } else {
-                        formData.nodeName = $('input[name="nodeName"]').val()
+                        formData.jcrNodeName = $('input[name="jcrNodeName"]').val()
                     }
                     formData.properties = $('input[name="properties[]"]').map(function() { return $(this).val(); }).get().join('\n')
                     break

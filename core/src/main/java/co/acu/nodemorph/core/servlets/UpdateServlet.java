@@ -47,7 +47,13 @@ public class UpdateServlet extends SlingAllMethodsServlet {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
         UpdateRequest updateRequest = new UpdateRequest(params, request.getResourceResolver());
 
-        List<UpdateResult> results = updateService.processUpdate(updateRequest);
+        List<UpdateResult> results;
+        try {
+            results = updateService.processUpdate(updateRequest);
+        } catch (Exception e) {
+            LOG.error("Update failed", e);
+            results = List.of(new UpdateResult(updateRequest.path, "Error: " + e.getMessage(), "Failed"));
+        }
 
         response.setContentType("application/json");
         response.getWriter().write(new Gson().toJson(new UpdateResponse(results.size(), results)));
