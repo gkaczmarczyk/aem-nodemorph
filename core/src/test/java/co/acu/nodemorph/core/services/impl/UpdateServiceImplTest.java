@@ -9,6 +9,7 @@ import com.day.cq.search.result.SearchResult;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,215 @@ class UpdateServiceImplTest {
         lenient().when(queryBuilder.createQuery(any(PredicateGroup.class), any())).thenReturn(query);
         lenient().when(query.getResult()).thenReturn(searchResult);
         lenient().when(searchResult.getResources()).thenReturn(Collections.emptyIterator());
+    }
+
+    @Test
+    void testAddNewPropertyToAllNodes() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH + "/skitouring");
+        params.put("operation", "add");
+        params.put("properties", "category=Adventure"); // New property
+        params.put("pageOnly", "false");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouring = context.resourceResolver().getResource(BASE_PATH + "/skitouring");
+        assertNotNull(skitouring, "Skitouring resource should exist");
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(skitouring).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path); // Updated path
+        assertEquals("Set category=Adventure", result.action);
+        assertEquals("Done", result.status);
+
+        ValueMap props = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertEquals("Adventure", props.get("category", String.class));
+    }
+
+    @Test
+    void testAddUpdateExistingProperty() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH + "/skitouring");
+        params.put("operation", "add");
+        params.put("properties", "jcr:title=Ski Touring Adventures"); // Update existing property
+        params.put("pageOnly", "true"); // Targets jcr:content
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouring = context.resourceResolver().getResource(BASE_PATH + "/skitouring");
+        assertNotNull(skitouring, "Skitouring resource should exist");
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(skitouring).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path);
+        assertEquals("Set jcr:title=Ski Touring Adventures", result.action);
+        assertEquals("Done", result.status);
+
+        ValueMap props = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertEquals("Ski Touring Adventures", props.get("jcr:title", String.class));
+    }
+
+    @Test
+    void testAddNewPropertyWithNodeMatch() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "add");
+        params.put("properties", "difficulty=Hard"); // New property
+        params.put("matchType", "node");
+        params.put("jcrNodeName", "jcr:content"); // Only update nodes named "jcr:content"
+        params.put("pageOnly", "false");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouringContent = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content");
+        Resource arcticContent = context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content");
+        assertNotNull(skitouringContent, "Skitouring jcr:content should exist");
+        assertNotNull(arcticContent, "Arctic jcr:content should exist");
+        when(searchResult.getResources()).thenReturn(Arrays.asList(
+                context.resourceResolver().getResource(BASE_PATH + "/skitouring"),
+                skitouringContent,
+                context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten"),
+                arcticContent
+        ).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(2, results.size()); // Only jcr:content nodes should match
+        UpdateResult result1 = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result1.path);
+        assertEquals("Set difficulty=Hard", result1.action);
+        assertEquals("Done", result1.status);
+
+        UpdateResult result2 = results.get(1);
+        assertEquals(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content", result2.path);
+        assertEquals("Set difficulty=Hard", result2.action);
+        assertEquals("Done", result2.status);
+
+        ValueMap props1 = skitouringContent.getValueMap();
+        assertEquals("Hard", props1.get("difficulty", String.class));
+        ValueMap props2 = arcticContent.getValueMap();
+        assertEquals("Hard", props2.get("difficulty", String.class));
+    }
+
+    @Test
+    void testAddUpdateExistingPropertyWithNodeMatch() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "add");
+        params.put("properties", "test=updated"); // Update existing property
+        params.put("matchType", "node");
+        params.put("jcrNodeName", "jcr:content");
+        params.put("pageOnly", "false");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource arcticContent = context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content");
+        Resource wildernessContent = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content");
+        assertNotNull(arcticContent, "Arctic jcr:content should exist");
+        assertNotNull(wildernessContent, "Wilderness jcr:content should exist");
+        when(searchResult.getResources()).thenReturn(Arrays.asList(
+                context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten"),
+                arcticContent,
+                context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness"),
+                wildernessContent
+        ).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(2, results.size());
+        UpdateResult result1 = results.get(0);
+        assertEquals(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content", result1.path);
+        assertEquals("Set test=updated", result1.action);
+        assertEquals("Done", result1.status);
+
+        UpdateResult result2 = results.get(1);
+        assertEquals(BASE_PATH + "/hours-of-wilderness/jcr:content", result2.path);
+        assertEquals("Set test=updated", result2.action);
+        assertEquals("Done", result2.status);
+
+        ValueMap props1 = arcticContent.getValueMap();
+        assertEquals("updated", props1.get("test", String.class));
+        ValueMap props2 = wildernessContent.getValueMap();
+        assertEquals("updated", props2.get("test", String.class));
+    }
+
+    @Test
+    void testReplacePropertyValue() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH + "/skitouring");
+        params.put("operation", "replace");
+        params.put("propName", "jcr:title");
+        params.put("find", "Skitouring");
+        params.put("replace", "Ski Touring");
+        params.put("pageOnly", "true");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouring = context.resourceResolver().getResource(BASE_PATH + "/skitouring");
+        assertNotNull(skitouring, "Skitouring resource should exist");
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(skitouring).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path);
+        assertEquals("Replace jcr:title: Skitouring → Ski Touring", result.action);
+        assertEquals("Done", result.status);
+
+        ValueMap props = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertEquals("Ski Touring", props.get("jcr:title", String.class));
+    }
+
+    @Test
+    void testReplacePropertyAcrossNodes() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "replace");
+        params.put("propName", "test");
+        params.put("find", "added");
+        params.put("replace", "modified");
+        params.put("pageOnly", "true");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        List<Resource> nodes = Arrays.asList(
+                context.resourceResolver().getResource(BASE_PATH + "/skitouring"),
+                context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten"),
+                context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness")
+        );
+        when(searchResult.getResources()).thenReturn(nodes.iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(3, results.size());
+        UpdateResult result1 = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result1.path);
+        assertEquals("Replace test: added → modified", result1.action);
+        assertEquals("Done", result1.status);
+
+        UpdateResult result2 = results.get(1);
+        assertEquals(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content", result2.path);
+        assertEquals("Replace test: added → modified", result2.action);
+        assertEquals("Done", result2.status);
+
+        UpdateResult result3 = results.get(2);
+        assertEquals(BASE_PATH + "/hours-of-wilderness/jcr:content", result3.path);
+        assertEquals("Replace test: added → modified", result3.action);
+        assertEquals("Done", result3.status);
+
+        ValueMap props1 = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertEquals("modified", props1.get("test", String.class));
+        ValueMap props2 = context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content").getValueMap();
+        assertEquals("modified", props2.get("test", String.class));
+        ValueMap props3 = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content").getValueMap();
+        assertEquals("modified", props3.get("test", String.class));
     }
 
     @Test

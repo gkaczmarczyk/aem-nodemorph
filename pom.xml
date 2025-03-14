@@ -153,6 +153,9 @@ Bundle-Category: ${componentGroupName}
                     <version>3.5.0</version>
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
+                        <systemPropertyVariables>
+                            <org.slf4j.simpleLogger.defaultLogLevel>info</org.slf4j.simpleLogger.defaultLogLevel>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
                 <plugin>

@@ -1,0 +1,15 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Explicitly set noisy packages to INFO -->
+    <logger name="org.apache.sling.testing.mock" level="INFO" />
+    <logger name="io.wcm.testing.mock" level="INFO" />
+</configuration>
