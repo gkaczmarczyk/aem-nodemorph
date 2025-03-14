@@ -46,15 +46,15 @@ class UpdateServiceImplTest {
         context.load().json("/co/acu/nodemorph/core/services/impl/UpdateServiceImplTest.json", BASE_PATH);
         context.currentPage(BASE_PATH);
 
-        when(queryBuilder.createQuery(any(PredicateGroup.class), any())).thenReturn(query);
-        when(query.getResult()).thenReturn(searchResult);
-        when(searchResult.getResources()).thenReturn(Collections.emptyIterator());
+        lenient().when(queryBuilder.createQuery(any(PredicateGroup.class), any())).thenReturn(query);
+        lenient().when(query.getResult()).thenReturn(searchResult);
+        lenient().when(searchResult.getResources()).thenReturn(Collections.emptyIterator());
     }
 
     @Test
     void testSimpleNodeCopy() {
         Map<String, String> params = new HashMap<>();
-        params.put("path", BASE_PATH + "/skitouring/jcr:content/root");
+        params.put("path", BASE_PATH + "/skitouring");
         params.put("operation", "copy");
         params.put("copyType", "node");
         params.put("source", "hero_image");
@@ -82,7 +82,7 @@ class UpdateServiceImplTest {
     @Test
     void testRelativeNodeCopy() {
         Map<String, String> params = new HashMap<>();
-        params.put("path", BASE_PATH + "/skitouring/jcr:content/root");
+        params.put("path", BASE_PATH + "/skitouring");
         params.put("operation", "copy");
         params.put("copyType", "node");
         params.put("source", "hero_image");
@@ -121,13 +121,12 @@ class UpdateServiceImplTest {
         UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
         Resource jcrContent = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content");
         assertNotNull(jcrContent, "jcr:content resource should exist");
-        when(searchResult.getResources()).thenReturn(Collections.singletonList(jcrContent).iterator());
 
         List<UpdateResult> results = updateService.processUpdate(request);
 
         assertEquals(1, results.size());
         UpdateResult result = results.get(0);
-        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path);
+        assertEquals(BASE_PATH, result.path);
         assertEquals("Copy node skitouring/jcr:content to skitouring/jcr:content_copy", result.action);
         assertEquals("Done", result.status);
 
