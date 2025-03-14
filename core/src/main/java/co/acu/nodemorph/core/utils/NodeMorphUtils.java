@@ -1,4 +1,4 @@
-package co.acu.nodemorph.core.util;
+package co.acu.nodemorph.core.utils;
 
 import co.acu.nodemorph.core.dto.UpdateRequest;
 import org.apache.sling.api.resource.Resource;

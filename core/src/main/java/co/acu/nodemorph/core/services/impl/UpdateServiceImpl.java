@@ -4,7 +4,7 @@ import co.acu.nodemorph.core.services.UpdateService;
 import co.acu.nodemorph.core.dto.UpdateRequest;
 import co.acu.nodemorph.core.dto.UpdateResult;
 import co.acu.nodemorph.core.dto.NodeProperty;
-import co.acu.nodemorph.core.util.NodeMorphUtils;
+import co.acu.nodemorph.core.utils.NodeMorphUtils;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;

@@ -380,9 +380,9 @@ Bundle-Category: ${componentGroupName}
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>uk.org.lidalia</groupId>
+                <groupId>com.github.valfirst</groupId>
                 <artifactId>slf4j-test</artifactId>
-                <version>1.0.1</version>
+                <version>3.0.1</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
