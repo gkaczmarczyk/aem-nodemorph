@@ -372,4 +372,81 @@ class UpdateServiceImplTest {
         assertNull(copiedNode, "Copied node should not exist in dry run");
     }
 
+    @Test
+    void testDeleteSingleProperty() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH + "/skitouring");
+        params.put("operation", "delete");
+        params.put("propNames", "test"); // Delete the "test" property
+        params.put("pageOnly", "true");  // Target jcr:content
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouring = context.resourceResolver().getResource(BASE_PATH + "/skitouring");
+        assertNotNull(skitouring, "Skitouring resource should exist");
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(skitouring).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path);
+        assertEquals("Delete properties: test", result.action);
+        assertEquals("Done", result.status);
+
+        ValueMap props = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertFalse(props.containsKey("test"), "Property 'test' should be deleted");
+        assertNotNull(props.get("cq:lastModified"), "cq:lastModified should be updated");
+        assertEquals(context.resourceResolver().getUserID(), props.get("cq:lastModifiedBy", String.class));
+    }
+
+    @Test
+    void testDeleteMultiplePropertiesAcrossNodes() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "delete");
+        params.put("propNames", "test,category"); // Delete "test" and "category" (category may not exist)
+        params.put("pageOnly", "true");
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        List<Resource> nodes = Arrays.asList(
+                context.resourceResolver().getResource(BASE_PATH + "/skitouring"),
+                context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten"),
+                context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness")
+        );
+        when(searchResult.getResources()).thenReturn(nodes.iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(3, results.size()); // All three nodes have "test" to delete
+
+        UpdateResult result1 = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result1.path);
+        assertEquals("Delete properties: test", result1.action); // Only "test" exists
+        assertEquals("Done", result1.status);
+
+        UpdateResult result2 = results.get(1);
+        assertEquals(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content", result2.path);
+        assertEquals("Delete properties: test", result2.action);
+        assertEquals("Done", result2.status);
+
+        UpdateResult result3 = results.get(2);
+        assertEquals(BASE_PATH + "/hours-of-wilderness/jcr:content", result3.path);
+        assertEquals("Delete properties: test", result3.action);
+        assertEquals("Done", result3.status);
+
+        ValueMap props1 = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertFalse(props1.containsKey("test"), "Property 'test' should be deleted from skitouring");
+        assertFalse(props1.containsKey("category"), "Property 'category' should not exist");
+
+        ValueMap props2 = context.resourceResolver().getResource(BASE_PATH + "/arctic-surfing-in-lofoten/jcr:content").getValueMap();
+        assertFalse(props2.containsKey("test"), "Property 'test' should be deleted from arctic");
+        assertFalse(props2.containsKey("category"), "Property 'category' should not exist");
+
+        ValueMap props3 = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content").getValueMap();
+        assertFalse(props3.containsKey("test"), "Property 'test' should be deleted from wilderness");
+        assertFalse(props3.containsKey("category"), "Property 'category' should not exist");
+    }
+
 }

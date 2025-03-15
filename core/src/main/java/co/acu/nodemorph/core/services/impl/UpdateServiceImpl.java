@@ -81,6 +81,8 @@ public class UpdateServiceImpl implements UpdateService {
                 } else {
                     processCopyOperation(request, nodes, usesNodeName, results);
                 }
+            } else if ("delete".equals(request.operation)) {
+                processDeleteOperation(request, nodes, results);
             }
 
             if (!request.dryRun && !results.stream().allMatch(r -> "Failed".equals(r.status))) {
@@ -372,6 +374,65 @@ public class UpdateServiceImpl implements UpdateService {
                 targetProps.put("cq:lastModifiedBy", request.resolver.getUserID());
             }
             results.add(new UpdateResult(basePath, action, "Done"));
+        }
+    }
+
+    /**
+     * Executes the "delete" operation by removing specified properties from nodes under the given path.
+     * The properties to delete are provided as a comma-separated list in the request’s propNames field
+     * (e.g., "key1,key2"). Iterates over all matching nodes, targeting either the node itself or its
+     * jcr:content child based on the pageOnly flag, and removes the properties if they exist.
+     *
+     * @param request the update request containing the path, propNames (comma-separated property names),
+     *                and configuration (e.g., dryRun, pageOnly).
+     * @param nodes the list of nodes retrieved from the JCR query to process.
+     * @param results the list to append deletion outcomes to, including success or failure details.
+     */
+    private void processDeleteOperation(UpdateRequest request, List<Resource> nodes, List<UpdateResult> results) {
+        if (request.propNames == null || request.propNames.trim().isEmpty()) {
+            results.add(new UpdateResult(request.path, "Error: No properties specified for deletion", "Failed"));
+            return;
+        }
+
+        String[] propertiesToDelete = request.propNames.split(",");
+        for (int i = 0; i < propertiesToDelete.length; i++) {
+            propertiesToDelete[i] = propertiesToDelete[i].trim();
+        }
+
+        for (Resource node : nodes) {
+            Resource target = getModifiableTarget(node, request.pageOnly);
+            if (target == null) {
+                results.add(new UpdateResult(node.getPath(), "Error: No modifiable target node", "Failed"));
+                continue;
+            }
+
+            String path = target.getPath();
+            ModifiableValueMap props = target.adaptTo(ModifiableValueMap.class);
+            if (props == null) {
+                results.add(new UpdateResult(path, "Error: Cannot modify node", "Failed"));
+                continue;
+            }
+
+            boolean deletedAny = false;
+            StringBuilder action = new StringBuilder("Delete properties: ");
+            for (String propName : propertiesToDelete) {
+                if (props.containsKey(propName)) {
+                    if (deletedAny) action.append(", ");
+                    action.append(propName);
+                    if (!request.dryRun) {
+                        props.remove(propName);
+                        if (props.containsKey("jcr:primaryType") && "cq:PageContent".equals(props.get("jcr:primaryType"))) {
+                            props.put("cq:lastModified", Calendar.getInstance());
+                            props.put("cq:lastModifiedBy", request.resolver.getUserID());
+                        }
+                    }
+                    deletedAny = true;
+                }
+            }
+
+            if (deletedAny) {
+                results.add(new UpdateResult(path, action.toString(), request.dryRun ? "Pending" : "Done"));
+            }
         }
     }
 
