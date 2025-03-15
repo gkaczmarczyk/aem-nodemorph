@@ -1,136 +1,102 @@
-# AEM NodeMorph
+# AEM NodeMorph Tool
 
-AEM NodeMorph is a powerful administrative tool for Adobe Experience Manager (AEM), designed to streamline bulk node operations on your author instance. Whether you need to search, update, delete, replace, or copy properties and nodes, NodeMorph provides an intuitive UI and robust backend—ideal for enterprise AEM environments.
+Transform your Adobe Experience Manager (AEM) content management with the **AEM NodeMorph Tool**— a powerful, intuitive utility designed to streamline bulk node operations directly within the AEM environment. Whether you’re searching for specific nodes or executing complex updates across your JCR repository, NodeMorph empowers administrators and developers with precision, flexibility, and ease. Built with AEM’s Coral UI and backed by a robust OSGi service, this tool is your go-to solution for managing content at scale.
 
-## Overview
+## Key Features
 
-Built with AEM best practices, NodeMorph offers:
-- **Search**: Query nodes by path, property, or name with flexible filters.
-- **Update**: Perform bulk operations—add/update properties, delete properties, replace values, or copy nodes/properties—with precise match conditions.
-- **Author-Focused**: Lightweight and tailored for AEM author instances.
+- **Search with Precision:** Query nodes by path, property, or name with flexible filters and verbose output options.
+- **Bulk Updates Made Simple:** Add, delete, replace, or copy properties and nodes across your repository with a single click.
+- **User-Friendly Interface:** Leverage AEM’s path browser, help tooltips, and dynamic forms for a seamless experience.
+- **Safe Previews:** Test changes with dry-run mode before committing to the JCR.
+- **Exportable Results:** Download search results as CSV for reporting or analysis.
 
-## Modules
+## Background
 
-The project includes these core modules:
+The AEM NodeMorph Tool builds on the foundation of the [AEM Page Tool](https://github.com/gkaczmarczyk/aem-page-tool), a command-line utility for managing AEM pages. Inspired by its simplicity and power, NodeMorph brings those capabilities into a modern, web-based interface—enhancing usability with a graphical UI while expanding functionality for bulk node operations.
 
-- **[core](core/README.md)**: Java bundle with OSGi services and servlets powering NodeMorph’s backend (e.g., `/bin/nodemorph/search`, `/bin/nodemorph/update`).
-- **[ui.apps](ui.apps/README.md)**: Contains `/apps/nodemorph`—components, templates, and clientlibs (JS/CSS) for the NodeMorph UI.
-- **all**: Single content package bundling all compiled modules for easy deployment.
-- **analyse**: Static analysis for AEMaaCS compatibility validation.
+## Getting Started
 
-## How to Build
+Deploy the tool to your AEM instance, navigate to the admin interface, and dive into two powerful tabs: **Search** and **Update**. Below, we’ll walk you through each tab’s capabilities.
 
-Run these Maven commands from the project root (`/path/to/aem-nodemorph`):
+---
 
-- **Build All**: Compile all modules:
-  ```bash
-  mvn clean install
-  ```
+## Search Tab
 
-- Deploy to Author: Build and install the `all` package to a local AEM instance (default: http://localhost:4502):
-   ```bash
-   mvn clean install -PautoInstallSinglePackage
-   ```
+![Search tab UI](/imgs/search_tab.png)
 
-- Deploy Bundle Only: Install just the core bundle:
-   ```bash
-   mvn clean install -PautoInstallBundle
-  ```
+The **Search Tab** is your window into the JCR repository, offering a fast, flexible way to locate nodes based on your criteria. Whether you’re auditing content, troubleshooting, or preparing for updates, this tab delivers actionable insights with minimal effort.
 
-- Deploy ui.apps Only: Install just the UI package from ui.apps:
-   ```bash
-   cd ui.apps
-   mvn clean install -PautoInstallPackage
-  ```
+### Capabilities
 
-## Accessing AEM NodeMorph
+- **Path-Based Search:** Start with a JCR path (e.g., `/content/my-site`) using the integrated path browser. The tool searches all nodes beneath this root, giving you a comprehensive view of your content structure.
+- **Property Filtering:** Narrow results by matching a property name (e.g., `sling:resourceType`) to a specific value—perfect for finding nodes with particular characteristics.
+- **Node Name Queries:** Use wildcards (e.g., `mynode_*`) to pinpoint nodes by name, ideal for targeting specific structures like `jcr:content`.
+- **Page Restriction:** Toggle the “Restrict to cq:Page nodes only” option to focus solely on page nodes, streamlining searches in page-heavy repositories.
+- **Verbose Output:** Enable detailed results to see all properties of matched nodes, not just the basics (path, title, type).
+- **Export to CSV:** Once results load, export them as a downloadable CSV file for offline analysis or documentation.
 
-- **URL:** After deployment, navigate to `/content/nodemorph/admin.html` on your AEM author instance (e.g., http://localhost:4502/content/nodemorph/admin.html).
-- **Tabs:**
-  - **Search:** Query nodes and export results as CSV.
-  - **Update:** Execute bulk operations with dry-run previews.
+### Use Case
 
-## Usage Examples
+Imagine you need to audit all pages under `/content/we-retail/languageamasters/en` with a `jcr:primaryType` of `cq:Page`. Enter the path, check “Match Property,” specify the property and value, and hit “Search.” You’ll get a clean table of results—exportable with one click.
 
-### Search
+![Displaying search results](/imgs/search_results.png)
 
-- **Path:** `/content/we-retail`.
-- **Match Property:** `sling:resourceType = cq:PageContent`.
-- **Result:** Lists matching nodes; exportable to CSV.
+---
 
-### Update Operations
+## Update Tab
 
-- **Add/Update Properties:**
-  - Path: `/content/we-retail`.
-  - Match Type: Property, `sling:resourceType = cq:PageContent`.
-  - Properties: `test=added`.
-  - Dry Run: Preview changes, then apply.
-- **Delete Properties:**
-  - Path: `/content/we-retail`.
-  - Property Names: `test`.
-- **Replace Properties:**
-  - Path: `/content/we-retail`.
-  - Property Name: `test`, Find: added, Replace: replaced.
-- **Copy:**
-  - Path: `/content/we-retail`.
-  - Copy Type: Property, Source: test, Target: test_copy.
+![Update tab UI](/imgs/update_tab.png)
 
-## Testing
+The **Update Tab** is where the magic happens— bulk node manipulation at your fingertips. From adding properties to copying nodes, this tab combines power with precision, backed by a robust backend that ensures changes are applied consistently across your AEM instance.
 
-### Manual Testing
+### Capabilities
 
-Run these in `/content/nodemorph/admin.html`:
+- **Flexible Path Targeting:** Define a base path (e.g., `/content/my-site`) to scope your updates, with the path browser simplifying navigation.
+- **Operation Modes:** Choose from four operations via a dropdown, each tailored to common AEM tasks:
+  - **Add/Update Properties:** Set or update properties on matching nodes. Supports single values (`key=value`) or arrays (`key=[val1,val2]`), with optional filters by property or node name.
+  - **Replace Properties:** Find and replace property values (e.g., swap `oldValue` for `newValue` in `jcr:title`) with pinpoint accuracy.
+  - **Copy:** Move nodes or properties with three flavors:
+    - **Node:** Copy a node to a new location (e.g., `node1` to `node2`).
+    - **Property:** Duplicate a property within a node (e.g., `propName` to `newProp`).
+    - **Property to Path:** Copy a property to a new path (e.g., `propName` to `/new/path`).
+  - **Delete Properties:** Remove specified properties (e.g., `key1,key2`) from all nodes under the path—great for cleaning up outdated metadata.
+- **Conditional Updates:** Filter nodes by property (`ifProp=ifValue`) or name (`jcrNodeName`) for Add/Update operations, ensuring changes hit the right targets.
+- **Page-Only Mode:** Restrict updates to `cq:Page` nodes, automatically targeting their `jcr:content` subnodes for consistency with AEM conventions.
+- **Dry-Run Preview:** Test your operation without committing changes—see the results table with “Pending” status to confirm your intent.
+- **Detailed Results:** Post-execution, review a table of updated paths, actions taken, and statuses (e.g., “Done” or “Failed”).
 
-1. **Search:** Verify node counts and CSV export.
-2. **Add/Update:** Check property addition with Property/Node matches.
-3. **Delete:** Confirm property removal.
-4. **Replace:** Validate value swaps.
-5. **Copy:** Test node/property duplication.
+### Use Case
 
-_Tip:_ Use CRXDE Lite to inspect changes (e.g., `/content/we-retail/jcr:content`).
+Need to remove a legacy property (`test`) from all pages under `/content/we-retail/en/experience`? Set the path, select “Delete Properties,” enter `test` in “Property Names,” check “Restrict to cq:Page nodes only,” and run it. The tool deletes `test` from every `jcr:content` node, logging each action for review.
 
-### Unit Tests
+---
 
-- In core:
-   ```bash
-   mvn clean test
-  ```
-- Tests OSGi services and servlet logic.
+## Why NodeMorph?
 
-### Static Analysis
+The AEM NodeMorph Tool bridges the gap between manual node tweaks and complex scripts. Built on AEM’s QueryBuilder and ResourceResolver APIs, it’s fast, reliable, and extensible. The intuitive Coral UI— complete with help icons and tooltips—makes it accessible to beginners while offering the depth power users crave. Whether you’re managing a handful of pages or thousands of nodes, NodeMorph saves time and reduces errors.
 
-- For AEMaaCS compatibility:
-   ```bash
-   mvn clean install
-  ```
-- Runs the analyse module automatically.
+### Prerequisites
 
-## ClientLibs
+To build and deploy the AEM NodeMorph Tool, ensure you have the following installed:
+- **Java 11**: The tool is compiled and runs on JDK 11, aligning with AEM’s supported runtime.
+- **Maven 3.9.9**: Use this version (or compatible) for dependency management and packaging. Earlier versions may work but haven’t been tested.
 
-The UI leverages an AEM ClientLib (`nodemorph.admin.tool`):
+Download Java 11 from [Adoptium](https://adoptium.net/) or your preferred provider, and Maven from [Apache Maven](https://maven.apache.org/download.cgi). Verify with `java -version` and `mvn -version`.
 
-- **Location:** `/apps/nodemorph/clientlibs/admin-tool`.
-- **Structure:**
-  - `js/`: Custom JavaScript (`script.js`).
-  - `css/`: Compiled LESS styles.
-  - `js.txt`/`css.txt`: Define load order.
-Built via Maven and deployed with `ui.apps`.
+### Installation
 
-## Roadmap
+1. Build the project: `mvn clean install -PautoInstallPackage`
+2. Deploy to your AEM instance (e.g., via Package Manager or CRXDE).
+3. Access the tool at `/apps/aemnodemorph/admin/content/nodemorph.html`.
 
-- Replication: Add an option to replicate (publish) updated nodes to AEM publish instances—enhancing workflow efficiency.
+### Contributing
 
-## Maven Settings
+Found a bug or have a feature idea? Open an issue or submit a pull request—we’d love to collaborate!
 
-For Adobe’s public repository (needed for AEM dependencies):
+### License
 
-- Configure `~/.maven/settings.xml` per [Adobe’s guide](http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html).
-
-## Contributing
-
-- **Issues:** Report bugs or suggest features via [your repo’s issue tracker].
-- **Code:** Fork, branch, and submit pull requests with clear descriptions.
-
-## License
+Copyright © 2025 Gregory Kaczmarczyk
 
 [Apache License Version 2.0](LICENSE)
+
+Apache License Version 2.0—use it, tweak it, share it. See [LICENSE](LICENSE) for full details.
