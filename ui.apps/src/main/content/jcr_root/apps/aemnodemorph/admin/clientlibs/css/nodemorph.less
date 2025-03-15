@@ -80,6 +80,23 @@
 
         .coral-Form-fieldwrapper {
             margin-bottom: 1rem;
+            position: relative;
+
+            .label-wrapper {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                margin-bottom: .5rem;
+                position: relative;
+
+                coral-icon {
+                    padding-top: 4px;
+                }
+
+                coral-tooltip {
+                    top: -12px !important;
+                }
+            }
 
             .coral-Form-fieldlabel {
                 display: block;
@@ -228,6 +245,11 @@
 
         .coral-Well {
             transition: margin-top 0.4s ease-out;
+
+            coral-checkbox {
+                margin-bottom: 1rem;
+                margin-right: 1rem;
+            }
         }
     }
 }

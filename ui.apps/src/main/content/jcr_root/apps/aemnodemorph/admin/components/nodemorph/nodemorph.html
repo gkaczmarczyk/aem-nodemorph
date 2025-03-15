@@ -15,25 +15,6 @@
                         <coral-shell-homeanchor-label>Adobe Experience Manager</coral-shell-homeanchor-label>
                     </a>
                 </coral-shell-header-home>
-<!--                <coral-shell-header-actions>-->
-<!--                    <coral-shell-menubar class="coral3-Shell-menubar" role="list">-->
-<!--                        <coral-shell-menubar-item id="granite-omnisearch-trigger" title="Search" icon="search" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;search&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" class="coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" role="listitem">-->
-<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
-<!--                        </coral-shell-menubar-item>-->
-<!--                        <coral-shell-menubar-item class="foundation-toggleable-control coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="Solutions" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/solutionswitcher.html" icon="apps" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;solutions&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" role="listitem">-->
-<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
-<!--                        </coral-shell-menubar-item>-->
-<!--                        <coral-shell-menubar-item class="foundation-toggleable-control coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="Help" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/help.html" icon="helpCircle" haspopup="dialog" data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;help&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" role="listitem">-->
-<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
-<!--                        </coral-shell-menubar-item>-->
-<!--                        <coral-shell-menubar-item title="Inbox" icon="bell" haspopup="dialog" class="granite-shell-badge coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" data-granite-shell-badge-src="/mnt/overlay/granite/ui/content/shell/header/actions/pulse.data.json" data-granite-shell-badge-console="/aem/inbox" data-granite-shell-badge-user="admin" data-granite-shell-badge-label-template="Inbox : {{count}} Notifications" role="listitem" badge="7" aria-label="Inbox : 7 Notifications">-->
-<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
-<!--                        </coral-shell-menubar-item>-->
-<!--                        <coral-shell-menubar-item data-foundation-tracking-event="{&quot;feature&quot;:&quot;shell&quot;,&quot;element&quot;:&quot;user&quot;,&quot;type&quot;:&quot;button&quot;,&quot;widget&quot;:{&quot;name&quot;:null,&quot;type&quot;:&quot;button&quot;}}" class="foundation-toggleable-control granite-user-icon coral3-Shell-menubar-item coral3-Shell-menubar-item&#45;&#45;default" title="User" data-foundation-toggleable-control-src="/mnt/overlay/granite/ui/content/shell/userproperties.html" icon="userCircleColor" iconsize="M" haspopup="dialog" role="listitem">-->
-<!--                            <coral-button-label handle="shellMenuButtonLabel"></coral-button-label>-->
-<!--                        </coral-shell-menubar-item>-->
-<!--                    </coral-shell-menubar>-->
-<!--                </coral-shell-header-actions>-->
                 <coral-shell-header-content></coral-shell-header-content>
             </coral-shell-header>
 
@@ -83,20 +64,32 @@
                                                         <div class="coral-table-column">
                                                             <div class="match-property-container">
                                                                 <div class="coral-Form-fieldwrapper" id="property-name-wrapper">
-                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                    <div class="label-wrapper">
+                                                                        <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                        <coral-icon icon="help" size="S"></coral-icon>
+                                                                        <coral-tooltip placement="left" target="_prev">
+                                                                            Filters nodes by this property name when "Match Property" is checked. Example: sling:resourceType
+                                                                        </coral-tooltip>
+                                                                    </div>
                                                                     <input is="coral-textfield" name="propertyName" id="property-name-field" placeholder="e.g., sling:resourceType"/>
                                                                 </div>
                                                             </div>
                                                             <div class="query-container">
                                                                 <div class="coral-Form-fieldwrapper">
-                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3" id="query-label">Search for Node</label>
+                                                                    <div class="label-wrapper">
+                                                                        <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3" id="query-label">Search for Node</label>
+                                                                        <coral-icon icon="help" size="S"></coral-icon>
+                                                                        <coral-tooltip placement="left" target="_prev">
+                                                                            Searches for nodes by name. Use wildcards like * or ? for partial matches. Example: mynode_*
+                                                                        </coral-tooltip>
+                                                                    </div>
                                                                     <input is="coral-textfield" name="query" id="query-field" placeholder="Enter node name (e.g., mynode_*)"/>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="coral-Well">
-                                                        <coral-checkbox value="on" name="pageOnly">Restrict to cq:Page nodes</coral-checkbox>
+                                                        <coral-checkbox value="on" name="pageOnly">Restrict to cq:Page nodes only</coral-checkbox>
                                                         <coral-checkbox value="on" name="verbose">Verbose Output</coral-checkbox>
                                                     </div>
                                                     <div class="coral-Form-fieldwrapper action-button-container">
@@ -177,16 +170,40 @@
                                                             <!-- Add/Update Fields -->
                                                             <div class="coral-Form-fieldwrapper operation-fields" id="add-fields">
                                                                 <div class="match-property-fields match-fields">
-                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Property (Optional)</label>
+                                                                    <div class="label-wrapper">
+                                                                        <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Property (Optional)</label>
+                                                                        <coral-icon icon="help" size="S"></coral-icon>
+                                                                        <coral-tooltip placement="left" target="_prev">
+                                                                            Filters nodes to update if they have this property. Example: sling:resourceType
+                                                                        </coral-tooltip>
+                                                                    </div>
                                                                     <input is="coral-textfield" name="ifProp" placeholder="e.g., sling:resourceType" />
-                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Value (Optional)</label>
+                                                                    <div class="label-wrapper">
+                                                                        <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">If Value (Optional)</label>
+                                                                        <coral-icon icon="help" size="S"></coral-icon>
+                                                                        <coral-tooltip placement="left" target="_prev">
+                                                                            Matches nodes where "If Property" equals this value. Example: cq:PageContent
+                                                                        </coral-tooltip>
+                                                                    </div>
                                                                     <input is="coral-textfield" name="ifValue" placeholder="e.g., cq:PageContent" />
                                                                 </div>
                                                                 <div class="match-node-fields match-fields">
-                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Node Name</label>
+                                                                    <div class="label-wrapper">
+                                                                        <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Node Name</label>
+                                                                        <coral-icon icon="help" size="S"></coral-icon>
+                                                                        <coral-tooltip placement="left" target="_prev">
+                                                                            Filters nodes by name when Match Type is "Node". Example: jcr:content
+                                                                        </coral-tooltip>
+                                                                    </div>
                                                                     <input is="coral-textfield" name="jcrNodeName" placeholder="e.g., jcr:content" />
                                                                 </div>
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Properties</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Properties</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        Adds or updates properties. Syntax: key=value for single values, key=[val1,val2] for arrays. One per line.
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <div class="property-list">
                                                                     <div class="property-row">
                                                                         <input is="coral-textfield" name="properties[]" placeholder="key=value" />
@@ -197,23 +214,59 @@
                                                             </div>
                                                             <!-- Delete Fields -->
                                                             <div class="coral-Form-fieldwrapper operation-fields" id="delete-fields">
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Names</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Names</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        Deletes these properties from all matching nodes. List multiple keys with commas. Example: key1,key2
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="propNames" placeholder="key1,key2" />
                                                             </div>
                                                             <!-- Replace Fields -->
                                                             <div class="coral-Form-fieldwrapper operation-fields" id="replace-fields">
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Property Name</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        The property to search and replace values in. Example: jcr:title
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="propName" placeholder="e.g., sling:resourceType" />
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Find Value</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Find Value</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        The current value to find in the property. Case-sensitive. Example: oldValue
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="find" placeholder="e.g., oldValue" />
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Replace With</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Replace With</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        The new value to set when "Find Value" matches. Example: newValue
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="replace" placeholder="e.g., newValue" />
                                                             </div>
                                                             <!-- Copy Fields -->
                                                             <div class="coral-Form-fieldwrapper operation-fields" id="copy-detail-fields">
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Source</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Source</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        Node or property to copy from. Example: node1 (Node), propName (Property), or propName (Property to Path)
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="source" placeholder="e.g., node1 or propName" />
-                                                                <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Target</label>
+                                                                <div class="label-wrapper">
+                                                                    <label class="coral-Form-fieldlabel coral-Heading coral-Heading--3">Target</label>
+                                                                    <coral-icon icon="help" size="S"></coral-icon>
+                                                                    <coral-tooltip placement="left" target="_prev">
+                                                                        Destination for the copy. Example: node2 (Node), newProp (Property), or /new/path (Property to Path)
+                                                                    </coral-tooltip>
+                                                                </div>
                                                                 <input is="coral-textfield" name="target" placeholder="e.g., node2 or /new/path" />
                                                             </div>
                                                         </div>
