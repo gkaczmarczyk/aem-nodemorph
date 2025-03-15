@@ -24,6 +24,19 @@ public class UpdateServiceImpl implements UpdateService {
     @Reference
     private QueryBuilder queryBuilder;
 
+    /**
+     * Processes a node update request by executing the specified operation (add, replace, or copy)
+     * on a set of nodes identified via a JCR query. This method orchestrates the entire workflow:
+     * querying nodes, applying the operation, and committing changes unless in dry-run mode.
+     *
+     * @param request the update request containing operation type, target path, properties, and
+     *                configuration (e.g., dryRun, pageOnly). Must include a valid ResourceResolver.
+     * @return a list of {@link UpdateResult} objects detailing the outcome of the operation for each
+     *         affected node, including path, action taken, status (e.g., "Done", "Failed"), and
+     *         optional error messages.
+     * @throws IllegalArgumentException if the request contains invalid parameters (e.g., malformed query).
+     * @throws RuntimeException if query execution fails due to underlying JCR issues.
+     */
     @Override
     public List<UpdateResult> processUpdate(UpdateRequest request) {
         List<UpdateResult> results = new ArrayList<>();
@@ -64,10 +77,8 @@ public class UpdateServiceImpl implements UpdateService {
                 }
 
                 if ("node".equals(request.copyType) && request.source.contains("/")) {
-                    // Direct path resolution for single-node copy
                     copySingleNode(request, resolver, results);
                 } else {
-                    // Query-based copy operations
                     processCopyOperation(request, nodes, usesNodeName, results);
                 }
             }
@@ -89,6 +100,15 @@ public class UpdateServiceImpl implements UpdateService {
         return results;
     }
 
+    /**
+     * Handles the "add" operation by setting or updating properties on the target nodes.
+     * Properties are applied to either the node itself or its jcr:content child, depending on the
+     * pageOnly flag. Skips nodes that don’t match the request’s matchType criteria.
+     *
+     * @param request the update request specifying properties to add and configuration (e.g., dryRun, matchType).
+     * @param nodes the list of nodes retrieved from the JCR query to process.
+     * @param results the list to append operation outcomes to, including success or failure details.
+     */
     private void processAddOperation(UpdateRequest request, List<Resource> nodes, List<UpdateResult> results) {
         List<NodeProperty> propsToAdd = request.getUpdateProperties();
         if (propsToAdd.isEmpty()) {
@@ -123,6 +143,14 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Executes the "replace" operation by finding and replacing a specific property value across
+     * target nodes. Only replaces the property if its current value matches the "find" string.
+     *
+     * @param request the update request containing propName, find, replace values, and configuration.
+     * @param nodes the list of nodes to inspect and potentially modify.
+     * @param results the list to record the outcome of each replacement attempt.
+     */
     private void processReplaceOperation(UpdateRequest request, List<Resource> nodes, List<UpdateResult> results) {
         if (request.propName == null || request.find == null || request.replace == null) {
             results.add(new UpdateResult(request.path, "Error: Missing replace parameters", "Failed"));
@@ -151,6 +179,17 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Manages the "copy" operation for multiple nodes, supporting node, property, or property-to-path
+     * copying based on the copyType. Resolves source and target paths dynamically unless nodename
+     * is used in the query.
+     *
+     * @param request the update request specifying copyType, source, target, and configuration.
+     * @param nodes the list of nodes to process for copying.
+     * @param usesNodeName indicates if the query uses a nodename filter, affecting path resolution.
+     * @param results the list to append copy operation outcomes to.
+     * @throws PersistenceException if node creation or property updates fail during commit.
+     */
     private void processCopyOperation(UpdateRequest request, List<Resource> nodes, boolean usesNodeName, List<UpdateResult> results) throws PersistenceException {
         for (Resource node : nodes) {
             Resource base = request.pageOnly ? node.getChild("jcr:content") : node;
@@ -179,6 +218,15 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Copies a single node from a source path to a target path within the request’s base path.
+     * Used when the copy operation specifies a direct path in the source (e.g., "skitouring/jcr:content").
+     *
+     * @param request the update request with source and target paths relative to the base path.
+     * @param resolver the ResourceResolver to access and modify the JCR repository.
+     * @param results the list to record the copy operation’s outcome.
+     * @throws PersistenceException if node creation or commit fails.
+     */
     private void copySingleNode(UpdateRequest request, ResourceResolver resolver, List<UpdateResult> results) throws PersistenceException {
         String sourcePath = NodeMorphUtils.resolvePath(request.path, request.source, resolver);
         Resource sourceRes = resolver.getResource(sourcePath);
@@ -209,6 +257,17 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Copies a node from a source path to a target path relative to a base node. Ensures the target
+     * parent exists before creating the new node.
+     *
+     * @param request the update request containing copy configuration.
+     * @param basePath the base path of the node being processed.
+     * @param sourcePath the absolute path of the source node to copy.
+     * @param targetPath the absolute path where the node should be copied.
+     * @param results the list to append the copy outcome to.
+     * @throws PersistenceException if node creation fails.
+     */
     private void copyNode(UpdateRequest request, String basePath, String sourcePath, String targetPath, List<UpdateResult> results) throws PersistenceException {
         Resource sourceRes = request.resolver.getResource(sourcePath);
         if (sourceRes == null) {
@@ -233,6 +292,14 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Copies a property’s value from one key to another within the same node. Updates cq:lastModified
+     * and cq:lastModifiedBy for cq:PageContent nodes.
+     *
+     * @param request the update request specifying source and target property names.
+     * @param base the resource whose properties are being modified.
+     * @param results the list to record the copy operation’s outcome.
+     */
     private void copyProperty(UpdateRequest request, Resource base, List<UpdateResult> results) {
         ModifiableValueMap props = base.adaptTo(ModifiableValueMap.class);
         if (props == null) {
@@ -259,6 +326,15 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Copies a property from the base node to a new property on a target node created at a specified
+     * path. Creates intermediate nodes if necessary and updates cq:lastModified metadata for pages.
+     *
+     * @param request the update request with source property and target path.
+     * @param base the resource providing the source property value.
+     * @param results the list to append the operation outcome to.
+     * @throws PersistenceException if node creation or property updates fail.
+     */
     private void copyPropertyToPath(UpdateRequest request, Resource base, List<UpdateResult> results) throws PersistenceException {
         String basePath = base.getPath();
         String sourcePath = basePath + "/" + request.source;
@@ -299,6 +375,15 @@ public class UpdateServiceImpl implements UpdateService {
         }
     }
 
+    /**
+     * Determines the target resource for property modifications. For cq:Page nodes, redirects to
+     * jcr:content unless pageOnly explicitly limits to that child node.
+     *
+     * @param node the resource to evaluate as the modification target.
+     * @param pageOnly if true, forces the target to be the jcr:content child; if false, may still
+     *                 redirect cq:Page to jcr:content.
+     * @return the modifiable target resource, or null if no valid target exists (e.g., no jcr:content).
+     */
     private Resource getModifiableTarget(Resource node, boolean pageOnly) {
         Resource target = pageOnly ? node.getChild("jcr:content") : node;
         if (target != null && target.getResourceType().equals("cq:Page")) {
@@ -307,10 +392,30 @@ public class UpdateServiceImpl implements UpdateService {
         return target;
     }
 
+    /**
+     * Checks if a node matches the request’s matchType criteria, specifically for "node" type where
+     * a jcrNodeName filter is applied.
+     *
+     * @param request the update request with matchType and optional jcrNodeName.
+     * @param node the resource to check against the match criteria.
+     * @return true if the node matches (or no specific match is required), false otherwise.
+     */
     private boolean matchesNode(UpdateRequest request, Resource node) {
         return !"node".equals(request.matchType) || request.jcrNodeName == null || request.jcrNodeName.isEmpty() || node.getName().equals(request.jcrNodeName);
     }
 
+    /**
+     * Updates a single property on a node, adding metadata (cq:lastModified, cq:lastModifiedBy) for
+     * cq:PageContent nodes. Supports dry-run mode by reporting "Pending" without modifying the node.
+     *
+     * @param request the update request with dryRun flag and resolver for user info.
+     * @param path the path of the node being modified.
+     * @param props the ModifiableValueMap to update with the new property.
+     * @param key the property name to set.
+     * @param value the value to assign to the property.
+     * @param action a descriptive string of the operation (e.g., "Set key=value").
+     * @param results the list to append the update outcome to.
+     */
     private void updateProperty(UpdateRequest request, String path, ModifiableValueMap props, String key, Object value, String action, List<UpdateResult> results) {
         if (request.dryRun) {
             results.add(new UpdateResult(path, action, "Pending"));

@@ -56,6 +56,28 @@ public class UpdateRequest {
         return props;
     }
 
+    /**
+     * Parses a string of property definitions into a key-value map for use in node update operations.
+     * Supports single-value properties (e.g., "key=value") and multi-value properties (e.g., "key=[val1, val2]"),
+     * where multi-values are split into a string array. This method is critical for interpreting user-provided
+     * property inputs in a flexible, human-readable format, such as those passed via a UI or script.
+     *
+     * <p>Example inputs:
+     * <ul>
+     *   <li>"title=New Title" → { "title": "New Title" }</li>
+     *   <li>"tags=[tag1, tag2, tag3]" → { "tags": ["tag1", "tag2", "tag3"] }</li>
+     *   <li>"title=New Title\ntags=[tag1, tag2]" → { "title": "New Title", "tags": ["tag1", "tag2"] }</li>
+     * </ul>
+     *
+     * <p>Lines are split by newlines, and each line is expected to follow a "key=value" format. Empty lines
+     * or malformed entries (e.g., missing "=") are skipped without error. Whitespace is trimmed from keys
+     * and values to ensure clean data.
+     *
+     * @param properties the raw string containing property definitions, potentially spanning multiple lines.
+     *                   May be null or empty, in which case an empty map is returned.
+     * @return a map where keys are property names and values are either strings (for single values) or
+     *         string arrays (for multi-value properties enclosed in square brackets).
+     */
     private Map<String, Object> parseProperties(String properties) {
         Map<String, Object> props = new HashMap<>();
         if (properties == null || properties.trim().isEmpty()) return props;
