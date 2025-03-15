@@ -22,9 +22,9 @@ Deploy the tool to your AEM instance, navigate to the admin interface, and dive 
 
 ## Search Tab
 
-![Search tab UI](/imgs/search_tab.png)
-
 The **Search Tab** is your window into the JCR repository, offering a fast, flexible way to locate nodes based on your criteria. Whether you’re auditing content, troubleshooting, or preparing for updates, this tab delivers actionable insights with minimal effort.
+
+![Search tab UI](/imgs/search_tab.png)
 
 ### Capabilities
 
@@ -45,9 +45,9 @@ Imagine you need to audit all pages under `/content/we-retail/languageamasters/e
 
 ## Update Tab
 
-![Update tab UI](/imgs/update_tab.png)
-
 The **Update Tab** is where the magic happens— bulk node manipulation at your fingertips. From adding properties to copying nodes, this tab combines power with precision, backed by a robust backend that ensures changes are applied consistently across your AEM instance.
+
+![Update tab UI](/imgs/update_tab.png)
 
 ### Capabilities
 
