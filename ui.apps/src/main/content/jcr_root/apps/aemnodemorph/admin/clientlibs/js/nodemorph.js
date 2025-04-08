@@ -57,8 +57,9 @@
             const propName = $('#property-name-field').val();
             const pageOnly = $("coral-checkbox[name='pageOnly']").prop('checked');
             const verbose = $("coral-checkbox[name='verbose']").prop('checked');
-            let url = '/bin/querybuilder.json?path=' + encodeURIComponent(path) + '&p.limit=1000&p.hits=full';
-            url += '&p.hits=full&p.nodedepth=0';
+            const propertiesInput = $('#properties-field').val()
+            const properties = propertiesInput ? propertiesInput.split(',').map(p => p.trim()).filter(p => p) : [PN_JCR_TITLE, PN_JCR_PRIMARY_TYPE]
+            let url = '/bin/querybuilder.json?path=' + encodeURIComponent(path) + '&p.limit=1000&p.hits=full&p.nodedepth=0'
 
             if (pageOnly) {
                 url += '&type=cq:Page'
@@ -70,9 +71,13 @@
                     url += '&nodename=' + encodeURIComponent(query)
                 }
             }
+            properties.forEach((prop, index) => {
+                url += `&${index + 1}_property=${encodeURIComponent(prop)}`
+            })
 
             $.getJSON(url, function(data) {
                 const tbody = $('#nodemorph-search-results .coral-Table-body').empty();
+                const thead = $('#search-results-header').empty()
                 const resultCount = data.results;
                 $('#result-text').text(`Found ${resultCount} result${resultCount === 1 ? '' : 's'}`)
                 lastSearchResults = data.hits
@@ -80,17 +85,26 @@
                 $('#nodemorph-search-results').css('display', resultCount > 0 ? 'table' : 'none')
 
                 if (data.hits && data.hits.length > 0) {
+                    const displayHeaders = propertiesInput ? properties : ['Title', 'Type']
+                    const headers = ['Path'].concat(properties.length > 0 ? properties : [PN_JCR_TITLE, PN_JCR_PRIMARY_TYPE])
+                    const headerRow = document.createElement('tr')
+                    headerRow.className = 'coral-Table-row'
+                    headerRow.innerHTML = headers.map(h => `<th class="coral-Table-headerCell">${h}</th>`).join('')
+                    thead.append(headerRow)
+
                     data.hits.forEach(function(hit) {
                         const row = document.createElement('tr');
                         row.className = 'coral-Table-row';
-                        row.innerHTML = `
-                            <td class='coral-Table-cell'>${hit[PN_JCR_PATH]}</td>
-                            <td class='coral-Table-cell'>${hit[PN_JCR_TITLE] || '-'}</td>
-                            <td class='coral-Table-cell'>${matchProp && propName ? hit[propName] || 'N/A' : hit[PN_JCR_PRIMARY_TYPE]}</td>
-                        `;
+                        const cells = [hit[PN_JCR_PATH]]
+                        if (propertiesInput) {
+                            properties.forEach(prop => cells.push(hit[prop] || '-'))
+                        } else {
+                            cells.push(hit[PN_JCR_TITLE] || '-', hit[PN_JCR_PRIMARY_TYPE])
+                        }
+                        row.innerHTML = cells.map(cell => `<td class="coral-Table-cell">${cell}</td>`).join('')
                         if (verbose) {
                             const props = Object.entries(hit)
-                                .filter(([key]) => !['path', 'name', PN_JCR_PRIMARY_TYPE].includes(key))
+                                .filter(([key]) => ![PN_JCR_PATH, 'name', PN_JCR_PRIMARY_TYPE].includes(key))
                                 .map(([key, val]) => `${key}: ${val}`)
                                 .join('\n');
                             row.setAttribute('title', props);
@@ -98,7 +112,7 @@
                         tbody.append(row);
                     });
                 } else {
-                    tbody.innerHTML = '<tr class="coral-Table-row"><td class="coral-Table-cell" colspan="3">No results found</td></tr>';
+                    tbody.innerHTML = '<tr class="coral-Table-row"><td class="coral-Table-cell" colspan="' + (properties.length + 1 || 3) + '">No results found</td></tr>'
                 }
             }).fail(function(xhr) {
                 $('#result-text').text('Search failed')
@@ -116,19 +130,21 @@
         $('#export-csv-btn').on('click', function() {
             if (lastSearchResults.length === 0) return
 
-            const headers = ['Path', 'Title', 'Matched Value']
-            const csvRows = [headers.join(',')]
+            const propertiesInput = $('#properties-field').val()
+            const properties = propertiesInput ? propertiesInput.split(',').map(p => p.trim()).filter(p => p) : [PN_JCR_TITLE, PN_JCR_PRIMARY_TYPE]
+            const displayHeaders = propertiesInput ? properties : ['Title', 'Type']
+            const headers = ['Path'].concat(displayHeaders)
+            const csvRows = [headers.map(h => `"${h}"`).join(',')]
 
             lastSearchResults.forEach(hit => {
-                const matchProp = $matchPropCheckbox.prop('checked')
-                const propName = $('#property-name-field').val()
-                const row = [
-                    `"${hit[PN_JCR_PATH]}"`,
-                    `"${hit[PN_JCR_TITLE] || '-'}"`,
-                    `"${matchProp && propName ? hit[propName] || 'N/A' : hit[PN_JCR_PRIMARY_TYPE]}"`
-                ]
-                csvRows.push(row.join(','))
-            })
+                const row = [hit[PN_JCR_PATH]]
+                if (properties.length > 0) {
+                    properties.forEach(prop => row.push(hit[prop] || '-'))
+                } else {
+                    row.push(hit[PN_JCR_TITLE] || '-', hit[PN_JCR_PRIMARY_TYPE])
+                }
+                csvRows.push(row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+            });
 
             const csvContent = csvRows.join('\n')
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })

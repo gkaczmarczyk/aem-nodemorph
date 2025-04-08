@@ -31,9 +31,10 @@ The **Search Tab** is your window into the JCR repository, offering a fast, flex
 - **Path-Based Search:** Start with a JCR path (e.g., `/content/my-site`) using the integrated path browser. The tool searches all nodes beneath this root, giving you a comprehensive view of your content structure.
 - **Property Filtering:** Narrow results by matching a property name (e.g., `sling:resourceType`) to a specific value—perfect for finding nodes with particular characteristics.
 - **Node Name Queries:** Use wildcards (e.g., `mynode_*`) to pinpoint nodes by name, ideal for targeting specific structures like `jcr:content`.
+- **Custom Property Output:** Specify properties (e.g., `jcr:title`, `customProp1`) to include in results— great for comparing specific property values across nodes.
 - **Page Restriction:** Toggle the “Restrict to cq:Page nodes only” option to focus solely on page nodes, streamlining searches in page-heavy repositories.
 - **Verbose Output:** Enable detailed results to see all properties of matched nodes, not just the basics (path, title, type).
-- **Export to CSV:** Once results load, export them as a downloadable CSV file for offline analysis or documentation.
+- **Export to CSV:** Once results load, export them as a downloadable CSV file with your chosen properties, perfect for offline analysis, documentation, or property comparisons.
 
 ### Use Case
 
