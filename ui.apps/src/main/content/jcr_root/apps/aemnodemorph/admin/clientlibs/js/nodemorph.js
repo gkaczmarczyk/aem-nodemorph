@@ -40,19 +40,28 @@
         const $queryField = $('#query-field');
         const $queryLabel = $('#query-label');
 
-        // Toggle Property Name Field and Relabel Query
+        // Search tab: Toggle Property Name Field and Relabel Query
         $matchPropCheckbox.on('change', function() {
             const isChecked = $(this).prop('checked');
             $propNameWrapper.toggleClass('visible', isChecked);
             $queryLabel.text(isChecked ? 'Property Value' : 'Search for Node');
-            $queryField.attr('placeholder', isChecked ? 'Enter property value' : 'Enter node name (e.g., mynode_*)');
+            $queryField.attr('placeholder', isChecked ? 'Enter property value' : 'Enter node name (e.g. mynode_*)')
         })
 
         // Search Form Submission
         $('#nodemorph-search-form').on('submit', function(e) {
             e.preventDefault();
+            $('#result-text').text('Searching...')
+            $('#export-csv-btn').hide()
+            $('#nodemorph-search-results').hide()
+            $('#nodemorph-search-results .coral-Table-body').empty()
+            $('#nodemorph-search-form button[type="submit"]').prop('disabled', true)
             const path = $('#nodepath').val()
             const query = $queryField.val().trim();
+            if (!path || !query) {
+                Coral.commons.toast('Please enter a valid path and query', {variant: 'error'})
+                return
+            }
             const matchProp = $matchPropCheckbox.prop('checked');
             const propName = $('#property-name-field').val();
             const pageOnly = $("coral-checkbox[name='pageOnly']").prop('checked');
@@ -72,6 +81,7 @@
             }
 
             $.getJSON(url, function(data) {
+                $('#nodemorph-search-form button[type="submit"]').prop('disabled', false)
                 const tbody = $('#nodemorph-search-results .coral-Table-body').empty();
                 const resultCount = data.results;
                 $('#result-text').text(`Found ${resultCount} result${resultCount === 1 ? '' : 's'}`)
@@ -101,6 +111,7 @@
                     tbody.innerHTML = '<tr class="coral-Table-row"><td class="coral-Table-cell" colspan="3">No results found</td></tr>';
                 }
             }).fail(function(xhr) {
+                $('#nodemorph-search-form button[type="submit"]').prop('disabled', false)
                 $('#result-text').text('Search failed')
                 $('#export-csv-btn').css('display', 'none')
                 $('#nodemorph-search-results').css('display', 'none')
@@ -156,7 +167,7 @@
                 $matchTypeSelect.trigger('change')
             } else if (operation === 'copy') {
                 $('#copy-type-fields').addClass('visible')
-                $('#copy-detail-fields').addClass('visible')
+                $('#copy-fields').addClass('visible')
             } else {
                 $(`#${operation}-fields`).addClass('visible')
             }
@@ -179,35 +190,25 @@
 
         $('#add-prop').on('click', function(e) {
             e.preventDefault()
-            const $list = $('.property-list')
-            const $row = $('<div class="property-row">' +
-                '<input is="coral-textfield" name="properties[]" placeholder="key=value" />' +
-                '<button is="coral-button" class="remove-prop" variant="quiet" icon="delete" iconsize="S"></button>' +
-                '</div>')
-            $list.append($row)
-            $list.find('.remove-prop').show() // Show delete on all rows if > 1
-            const $addFields = $('#add-fields')
-            if ($addFields.hasClass('visible')) {
-                $addFields.css('max-height', $addFields[0].scrollHeight + 'px')
-            }
+            $('#add-prop-list').append(createPropertyRow('properties[]'))
+            setPanelHeight('add-fields')
         })
-
-        $(document).on('click', '.remove-prop', function(e) {
+        $(document).on('click', '#add-prop-list .remove-prop', function(e) {
             e.preventDefault()
-            const $row = $(this).closest('.property-row')
-            $row.remove()
-            if ($('.property-row').length === 1) {
-                $('.remove-prop').hide()
-            }
-            const $addFields = $('#add-fields')
-            if ($addFields.hasClass('visible')) {
-                $addFields.css('max-height', $addFields[0].scrollHeight + 'px')
-            }
+            $(this).closest('.property-row').remove()
+            setPanelHeight('add-fields')
         })
 
-        if ($('.property-row').length === 1) {
-            $('.remove-prop').hide();
-        }
+        $('#add-newnode-prop').on('click', function(e) {
+            e.preventDefault()
+            $('#newnode-prop-list').append(createPropertyRow('newNodeProperties[]'))
+            setPanelHeight('create-fields')
+        })
+        $(document).on('click', '#newnode-prop-list .remove-prop', function(e) {
+            e.preventDefault()
+            $(this).closest('.property-row').remove()
+            setPanelHeight('create-fields')
+        })
 
         // Update Form Submission
         $('#nodemorph-update-form').on('submit', function(e) {
@@ -243,6 +244,12 @@
                     formData.source = $('input[name="source"]').val();
                     formData.target = $('input[name="target"]').val();
                     break;
+                case 'create':
+                    formData.newNodeName = $('input[name="newNodeName"]').val()
+                    formData.newNodeType = $('input[name="newNodeType"]').val()
+                    formData.parentMatchCondition = $('input[name="parentMatchCondition"]').val()
+                    formData.newNodeProperties = $('input[name="newNodeProperties[]"]').map(function() {return $(this).val()}).get().join('\n')
+                    break
             }
 
             $.post('/bin/nodemorph/update', formData)
@@ -317,4 +324,21 @@
         }
 
     }
+
+    // Update the panel height when adding or removing property fields
+    function setPanelHeight(panelId) {
+        const $panel = $(`#${panelId}`)
+        if ($panel.hasClass('visible')) {
+            $panel.css('max-height', $panel[0].scrollHeight + 'px')
+        }
+    }
+
+    // Create HTML for a property field
+    function createPropertyRow(nameAttr) {
+        return $('<div class="property-row">' +
+            `<input is="coral-textfield" name="${nameAttr}" placeholder="key=value" />` +
+            '<button is="coral-button" class="remove-prop" variant="quiet" icon="delete" iconsize="S"></button>' +
+            '</div>')
+    }
+
 })(jQuery, Coral)

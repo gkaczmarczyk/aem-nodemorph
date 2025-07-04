@@ -1,17 +1,6 @@
 #nodemorph-tool {
+    overflow: visible;
     padding: 20px;
-}
-
-.nodemorph-Icon--ninja {
-    background-image: url('../icons/ninja-head.svg');
-    background-size: contain;
-    width: 24px;
-    height: 24px;
-    display: inline-block;
-}
-
-.coral-Card .nodemorph-Icon--ninja {
-    vertical-align: middle;
 }
 
 .foundation-layout-panel-bodywrapper {
@@ -86,7 +75,6 @@
                 display: flex;
                 flex-direction: row;
                 justify-content: space-between;
-                margin-bottom: .5rem;
                 position: relative;
 
                 coral-icon {
@@ -124,11 +112,10 @@
                 }
             }
 
-            &#property-name-wrapper, &.operation-fields, .match-fields {
+            &#property-name-wrapper, .match-fields {
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.4s ease-out;
-                margin-bottom: 0;
 
                 &.visible {
                     margin-bottom: 1rem;
@@ -138,10 +125,21 @@
             &#property-name-wrapper {
                 &.visible {
                     max-height: 100px;
+                    overflow: visible;
                 }
             }
 
             &.operation-fields {
+                height: 0;
+                overflow: hidden;
+                transition: height 0.4s ease;
+
+                &.visible {
+                    height: auto;
+                    margin-bottom: 1rem;
+                    overflow: visible;
+                }
+
                 &#copy-type-fields.visible, &#match-type-fields.visible {
                     max-height: 120px;
                     overflow: visible;
@@ -149,19 +147,27 @@
                 }
 
                 &#add-fields.visible {
-                    max-height: 400px;
+                    max-height: none;
+                    min-height: 302px;
+                    overflow: visible;
                 }
 
                 &#delete-fields.visible {
-                    max-height: 150px;
+                    min-height: 150px;
                 }
 
                 &#replace-fields.visible {
-                    max-height: 250px;
+                    min-height: 250px;
                 }
 
                 &#copy-detail-fields.visible {
-                    max-height: 200px;
+                    min-height: 200px;
+                }
+
+                &#create-fields.visible {
+                    max-height: none;
+                    min-height: 450px;
+                    overflow: visible;
                 }
 
                 input {
@@ -187,6 +193,9 @@
                         max-height: 150px;
                     }
                 }
+            }
+
+            &#add-fields, &#create-fields {
 
                 .property-list {
 
@@ -195,6 +204,13 @@
                         align-items: center;
                         gap: 0.5rem;
                         margin-bottom: 0.5rem;
+
+                        &:first-child {
+
+                            .remove-prop {
+                                display: none !important;
+                            }
+                        }
 
                         input {
                             flex-grow: 1;
@@ -206,11 +222,6 @@
                     display: block;
                     float: right;
                     margin-top: 0.5rem;
-                }
-
-                &.visible {
-                    max-height: 400px;
-                    padding-bottom: 1rem;
                 }
             }
         }
@@ -232,6 +243,27 @@
         .coral-table-column {
             display: flex;
             flex-direction: column;
+
+            &#field-panel-container {
+                position: relative;
+                transition: height 0.6s ease;
+
+                .operation-fields {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    pointer-events: none;
+
+                    &.visible {
+                        position: relative;
+                        opacity: 1;
+                        pointer-events: auto;
+                    }
+                }
+            }
         }
 
         .action-button-container {
