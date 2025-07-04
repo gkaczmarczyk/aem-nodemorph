@@ -464,4 +464,63 @@ class UpdateServiceImplTest {
         assertFalse(props3.containsKey("category"), "Property 'category' should not exist");
     }
 
+    @Test
+    void testCreateNewNodeDryRun() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "create");
+        params.put("newNodeName", "teaser");
+        params.put("newNodeType", "nt:unstructured");
+        params.put("newNodeProperties", "jcr:title=New Teaser");
+        params.put("parentMatchCondition", "jcr:content");
+        params.put("dryRun", "true");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource match = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content");
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(match).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals("Pending", result.status);
+        assertEquals("Would create nt:unstructured", result.action);
+
+        Resource newNode = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content/teaser");
+        assertNull(newNode, "Node should not be created during dry run");
+    }
+
+    @Test
+    void testCreateNewNodeUnderMatchedParent() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH);
+        params.put("operation", "create");
+        params.put("newNodeName", "teaser");
+        params.put("newNodeType", "nt:unstructured");
+        params.put("newNodeProperties", "jcr:title=New Teaser\nteaserText=Exploring the wilds of Western Australia");
+        params.put("parentMatchCondition", "jcr:content"); // Optional filter: match parent node name
+        params.put("dryRun", "false");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource wilderness = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content");
+        assertNotNull(wilderness, "jcr:content node should exist");
+
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(wilderness).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/hours-of-wilderness/jcr:content/teaser", result.path);
+        assertEquals("Created node of type nt:unstructured", result.action);
+        assertEquals("Done", result.status);
+
+        Resource newNode = context.resourceResolver().getResource(BASE_PATH + "/hours-of-wilderness/jcr:content/teaser");
+        assertNotNull(newNode, "Newly created node should exist");
+
+        ValueMap props = newNode.getValueMap();
+        assertEquals("New Teaser", props.get("jcr:title", String.class));
+        assertEquals("Exploring the wilds of Western Australia", props.get("teaserText", String.class));
+    }
+
 }

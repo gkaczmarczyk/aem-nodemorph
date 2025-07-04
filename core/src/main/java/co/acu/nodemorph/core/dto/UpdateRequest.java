@@ -15,10 +15,12 @@
  */
 package co.acu.nodemorph.core.dto;
 
+import co.acu.nodemorph.core.utils.NodeMorphUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class UpdateRequest {
     public String path;
@@ -38,6 +40,10 @@ public class UpdateRequest {
     public String target;
     public String matchType;
     public String jcrNodeName;
+    public String newNodeName;
+    public String newNodeType;
+    public String parentMatchCondition;
+    public String newNodeProperties;
     public ResourceResolver resolver;
 
     private static final String[] WRITABLE_PROPERTIES = {"properties"};
@@ -60,64 +66,23 @@ public class UpdateRequest {
         this.target = params.get("target");
         this.matchType = params.get("matchType");
         this.jcrNodeName = params.get("jcrNodeName");
+        this.newNodeName = params.get("newNodeName");
+        this.newNodeType = params.get("newNodeType");
+        this.parentMatchCondition = params.get("parentMatchCondition");
+        this.newNodeProperties = params.get("newNodeProperties");
         this.resolver = resolver;
     }
 
     public List<NodeProperty> getUpdateProperties() {
         List<NodeProperty> props = new ArrayList<>();
         if (properties != null && !properties.trim().isEmpty()) {
-            parseProperties(properties).forEach((k, v) -> props.add(new NodeProperty(k, v)));
+            NodeMorphUtils.parseProperties(properties).forEach((k, v) -> props.add(new NodeProperty(k, v)));
         }
         return props;
     }
 
-    /**
-     * Parses a string of property definitions into a key-value map for use in node update operations.
-     * Supports single-value properties (e.g., "key=value") and multi-value properties (e.g., "key=[val1, val2]"),
-     * where multi-values are split into a string array. This method is critical for interpreting user-provided
-     * property inputs in a flexible, human-readable format, such as those passed via a UI or script.
-     *
-     * <p>Example inputs:
-     * <ul>
-     *   <li>"title=New Title" → { "title": "New Title" }</li>
-     *   <li>"tags=[tag1, tag2, tag3]" → { "tags": ["tag1", "tag2", "tag3"] }</li>
-     *   <li>"title=New Title\ntags=[tag1, tag2]" → { "title": "New Title", "tags": ["tag1", "tag2"] }</li>
-     * </ul>
-     *
-     * <p>Lines are split by newlines, and each line is expected to follow a "key=value" format. Empty lines
-     * or malformed entries (e.g., missing "=") are skipped without error. Whitespace is trimmed from keys
-     * and values to ensure clean data.
-     *
-     * @param properties the raw string containing property definitions, potentially spanning multiple lines.
-     *                   May be null or empty, in which case an empty map is returned.
-     * @return a map where keys are property names and values are either strings (for single values) or
-     *         string arrays (for multi-value properties enclosed in square brackets).
-     */
-    private Map<String, Object> parseProperties(String properties) {
-        Map<String, Object> props = new HashMap<>();
-        if (properties == null || properties.trim().isEmpty()) return props;
-
-        String[] lines = properties.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            String[] parts = line.split("=", 2);
-            if (parts.length == 2) {
-                String key = parts[0].trim();
-                String value = parts[1].trim();
-                if (value.startsWith("[") && value.endsWith("]")) {
-                    String[] values = value.substring(1, value.length() - 1).split(",");
-                    for (int i = 0; i < values.length; i++) {
-                        values[i] = values[i].trim();
-                    }
-                    props.put(key, values);
-                } else {
-                    props.put(key, value);
-                }
-            }
-        }
-        return props;
+    public Map<String, Object> getNewNodeProperties() {
+        return NodeMorphUtils.parseProperties(this.newNodeProperties);
     }
 
 }

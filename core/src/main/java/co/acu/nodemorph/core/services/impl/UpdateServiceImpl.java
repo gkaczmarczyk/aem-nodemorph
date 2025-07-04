@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Session;
 import java.util.*;
 
+import static com.day.cq.commons.jcr.JcrConstants.NT_UNSTRUCTURED;
+
 @Component(service = UpdateService.class)
 public class UpdateServiceImpl implements UpdateService {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateServiceImpl.class);
@@ -96,6 +98,8 @@ public class UpdateServiceImpl implements UpdateService {
                 } else {
                     processCopyOperation(request, nodes, usesNodeName, results);
                 }
+            } else if ("create".equals(request.operation)) {
+                processCreateOperation(request, nodes, results);
             } else if ("delete".equals(request.operation)) {
                 processDeleteOperation(request, nodes, results);
             }
@@ -389,6 +393,68 @@ public class UpdateServiceImpl implements UpdateService {
                 targetProps.put("cq:lastModifiedBy", request.resolver.getUserID());
             }
             results.add(new UpdateResult(basePath, action, "Done"));
+        }
+    }
+
+    private void processCreateOperation(UpdateRequest request, List<Resource> nodes, List<UpdateResult> results) {
+        if (request.newNodeName == null || request.newNodeName.isEmpty()) {
+            results.add(new UpdateResult(request.path, "Error: Missing newNodeName", "Failed"));
+            return;
+        }
+
+        String matchKey = null;
+        String matchValue = null;
+        if (request.parentMatchCondition != null && !request.parentMatchCondition.trim().isEmpty()) {
+            Map<String, Object> matchProps = NodeMorphUtils.parseProperties(request.parentMatchCondition);
+            if (!matchProps.isEmpty()) {
+                Map.Entry<String, Object> entry = matchProps.entrySet().iterator().next();
+                matchKey = entry.getKey();
+                Object val = entry.getValue();
+                if (val instanceof String) {
+                    matchValue = (String) val;
+                } else if (val instanceof String[] && ((String[]) val).length > 0) {
+                    matchValue = ((String[]) val)[0];
+                }
+            }
+        }
+
+        for (Resource node : nodes) {
+            if (matchKey != null && matchValue != null) {
+                ValueMap nodeProps = node.getValueMap();
+                Object val = nodeProps.get(matchKey);
+                if (val == null || !val.toString().equals(matchValue)) {
+                    continue;
+                }
+            }
+
+            String newNodeName = request.newNodeName;
+//            String type = request.newNodeType != null && !request.newNodeType.isEmpty() ? request.newNodeType : NT_UNSTRUCTURED;
+            String type = Optional.ofNullable(request.newNodeType)
+                    .filter(s -> !s.isBlank())
+                    .orElse(NT_UNSTRUCTURED);
+
+            try {
+                Resource existing = node.getChild(newNodeName);
+                if (existing != null) {
+                    results.add(new UpdateResult(existing.getPath(), "Skipped: Node already exists", "Skipped"));
+                    continue;
+                }
+
+                if (request.dryRun) {
+                    results.add(new UpdateResult(node.getPath() + "/" + newNodeName, "Would create " + type, "Pending"));
+                    continue;
+                }
+
+                Map<String, Object> props = new HashMap<>();
+                props.put("jcr:primaryType", type);
+                props.putAll(request.getNewNodeProperties());
+
+                Resource created = request.resolver.create(node, newNodeName, props);
+                results.add(new UpdateResult(created.getPath(), "Created node of type " + type, "Done"));
+
+            } catch (PersistenceException e) {
+                results.add(new UpdateResult(node.getPath(), "Error: " + e.getMessage(), "Failed"));
+            }
         }
     }
 
