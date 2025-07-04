@@ -223,4 +223,40 @@ class UpdateRequestTest {
         assertTrue(request.getUpdateProperties().isEmpty());
     }
 
+    @Test
+    void testGetNewNodeProperties_WithValidInput() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", "/content/sample");
+        params.put("operation", "create");
+        params.put("newNodeProperties", "teaserText=Van life adventures\nstyle=[bold, italic]");
+
+        UpdateRequest request = new UpdateRequest(params, mockResolver);
+        Map<String, Object> newProps = request.getNewNodeProperties();
+
+        assertEquals(2, newProps.size());
+        assertEquals("Van life adventures", newProps.get("teaserText"));
+
+        assertInstanceOf(String[].class, newProps.get("style"));
+        String[] styles = (String[]) newProps.get("style");
+        assertArrayEquals(new String[]{"bold", "italic"}, styles);
+    }
+
+    @Test
+    void testGetNewNodeProperties_EmptyOrMissing() {
+        // Missing param
+        Map<String, String> paramsMissing = new HashMap<>();
+        paramsMissing.put("path", "/content/sample");
+
+        UpdateRequest requestMissing = new UpdateRequest(paramsMissing, mockResolver);
+        assertTrue(requestMissing.getNewNodeProperties().isEmpty());
+
+        // Empty param
+        Map<String, String> paramsEmpty = new HashMap<>();
+        paramsEmpty.put("path", "/content/sample");
+        paramsEmpty.put("newNodeProperties", "   ");
+
+        UpdateRequest requestEmpty = new UpdateRequest(paramsEmpty, mockResolver);
+        assertTrue(requestEmpty.getNewNodeProperties().isEmpty());
+    }
+
 }
