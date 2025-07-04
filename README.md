@@ -60,6 +60,7 @@ The **Update Tab** is where the magic happens— bulk node manipulation at your 
     - **Property:** Duplicate a property within a node (e.g., `propName` to `newProp`).
     - **Property to Path:** Copy a property to a new path (e.g., `propName` to `/new/path`).
   - **Delete Properties:** Remove specified properties (e.g., `key1,key2`) from all nodes under the path—great for cleaning up outdated metadata.
+  - **Create Nodes:** Add a new child node under matching parent nodes. Specify the new node name, optional primary type (defaults to `nt:unstructured`), and one or more properties to set. Supports conditional creation based on parent node properties.
 - **Conditional Updates:** Filter nodes by property (`ifProp=ifValue`) or name (`jcrNodeName`) for Add/Update operations, ensuring changes hit the right targets.
 - **Page-Only Mode:** Restrict updates to `cq:Page` nodes, automatically targeting their `jcr:content` subnodes for consistency with AEM conventions.
 - **Dry-Run Preview:** Test your operation without committing changes—see the results table with “Pending” status to confirm your intent.
@@ -68,6 +69,11 @@ The **Update Tab** is where the magic happens— bulk node manipulation at your 
 ### Use Case
 
 Need to remove a legacy property (`test`) from all pages under `/content/we-retail/en/experience`? Set the path, select “Delete Properties,” enter `test` in “Property Names,” check “Restrict to cq:Page nodes only,” and run it. The tool deletes `test` from every `jcr:content` node, logging each action for review.
+
+**Want to scaffold components under responsive grids only?**
+Use the “Create Nodes” operation under `/content/we-retail/language-masters/en/experience` with a matching parent property like `sling:resourceType=wcm/foundation/components/responsivegrid`, a node name like `componentnode`, and a property like `testprop=myvalue`. The tool adds the node and sets its properties, only on matching parent nodes.
+
+![Create Nodes Operation UI](/imgs/update_create-node.png)
 
 ---
 
