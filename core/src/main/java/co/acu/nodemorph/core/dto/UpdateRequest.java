@@ -44,6 +44,7 @@ public class UpdateRequest {
     public String newNodeType;
     public String parentMatchCondition;
     public String newNodeProperties;
+    public boolean isPartialMatch;
     public ResourceResolver resolver;
 
     private static final String[] WRITABLE_PROPERTIES = {"properties"};
@@ -70,6 +71,7 @@ public class UpdateRequest {
         this.newNodeType = params.get("newNodeType");
         this.parentMatchCondition = params.get("parentMatchCondition");
         this.newNodeProperties = params.get("newNodeProperties");
+        this.isPartialMatch = Boolean.parseBoolean(params.get("partialMatch"));
         this.resolver = resolver;
     }
 

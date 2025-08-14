@@ -253,6 +253,7 @@
                 case 'replace':
                     formData.propName = $('input[name="propName"]').val();
                     formData.find = $('input[name="find"]').val();
+                    formData.partialMatch = $('coral-checkbox[name="partialMatch"]').prop('checked')
                     formData.replace = $('input[name="replace"]').val();
                     break;
                 case 'copy':

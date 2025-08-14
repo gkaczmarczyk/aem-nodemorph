@@ -58,7 +58,12 @@ public class NodeMorphUtils {
             }
             queryParams.put("type", request.pageOnly ? "cq:Page" : "nt:base");
             queryParams.put("property", request.propName);
-            queryParams.put("property.value", request.find);
+            if (request.isPartialMatch) {
+                queryParams.put("property.value", "%" + request.find + "%");
+                queryParams.put("property.operation", "like");
+            } else {
+                queryParams.put("property.value", request.find);
+            }
         } else if ("copy".equals(request.operation)) {
             queryParams.put("type", "nt:base");
             if ("node".equals(request.copyType) && request.source != null && !request.source.isEmpty() &&

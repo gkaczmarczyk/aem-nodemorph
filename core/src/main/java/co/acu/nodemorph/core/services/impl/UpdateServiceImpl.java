@@ -192,10 +192,22 @@ public class UpdateServiceImpl implements UpdateService {
                 continue;
             }
 
-            Object currentValue = props.get(request.propName);
-            if (currentValue != null && currentValue.toString().equals(request.find)) {
-                String action = String.format("Replace %s: %s → %s", request.propName, request.find, request.replace);
-                updateProperty(request, path, props, request.propName, request.replace, action, results);
+            Object currentPropValue = props.get(request.propName);
+            if (currentPropValue != null) {
+                boolean matches;
+                String currValue = currentPropValue.toString();
+                String newValue = request.replace;
+                if (request.isPartialMatch) {
+                    matches = currValue.contains(request.find);
+                    newValue = currValue.replace(request.find, request.replace);
+                } else {
+                    matches = currValue.equals(request.find);
+                }
+
+                if (matches) {
+                    String action = String.format("Replace %s: %s → %s", request.propName, currValue, newValue);
+                    updateProperty(request, path, props, request.propName, newValue, action, results);
+                }
             }
         }
     }

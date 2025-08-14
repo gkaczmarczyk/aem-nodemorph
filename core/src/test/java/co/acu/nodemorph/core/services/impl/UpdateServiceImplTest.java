@@ -277,6 +277,36 @@ class UpdateServiceImplTest {
     }
 
     @Test
+    void testReplacePropertyValuePartialMatch() {
+        Map<String, String> params = new HashMap<>();
+        params.put("path", BASE_PATH + "/skitouring");
+        params.put("operation", "replace");
+        params.put("propName", "jcr:title");
+        params.put("find", "touring");
+        params.put("replace", " Adventure");
+        params.put("pageOnly", "false");
+        params.put("dryRun", "false");
+        params.put("partialMatch", "true");
+
+        UpdateRequest request = new UpdateRequest(params, context.resourceResolver());
+        Resource skitouring = context.resourceResolver().getResource(BASE_PATH + "/skitouring");
+        assertNotNull(skitouring, "Skitouring resource should exist");
+
+        when(searchResult.getResources()).thenReturn(Collections.singletonList(skitouring).iterator());
+
+        List<UpdateResult> results = updateService.processUpdate(request);
+
+        assertEquals(1, results.size());
+        UpdateResult result = results.get(0);
+        assertEquals(BASE_PATH + "/skitouring/jcr:content", result.path);
+        assertEquals("Replace jcr:title: Skitouring → Ski Adventure", result.action);
+        assertEquals("Done", result.status);
+
+        ValueMap props = context.resourceResolver().getResource(BASE_PATH + "/skitouring/jcr:content").getValueMap();
+        assertEquals("Ski Adventure", props.get("jcr:title", String.class));
+    }
+
+    @Test
     void testSimpleNodeCopy() {
         Map<String, String> params = new HashMap<>();
         params.put("path", BASE_PATH + "/skitouring");
