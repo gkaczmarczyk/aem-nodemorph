@@ -30,6 +30,7 @@ The **Search Tab** is your window into the JCR repository, offering a fast, flex
 
 - **Path-Based Search:** Start with a JCR path (e.g., `/content/my-site`) using the integrated path browser. The tool searches all nodes beneath this root, giving you a comprehensive view of your content structure.
 - **Property Filtering:** Narrow results by matching a property name (e.g., `sling:resourceType`) to a specific value—perfect for finding nodes with particular characteristics.
+  - **Substring Match:** _(available when Match Property is checked)_ Allows matching when the property value contains the entered text anywhere within it, rather than matching the value exactly. Useful when the property’s value may include prefixes or suffixes. 
 - **Node Name Queries:** Use wildcards (e.g., `mynode_*`) to pinpoint nodes by name, ideal for targeting specific structures like `jcr:content`.
 - **Custom Property Output:** Specify properties (e.g., `jcr:title`, `customProp1`) to include in results— great for comparing specific property values across nodes.
 - **Page Restriction:** Toggle the “Restrict to cq:Page nodes only” option to focus solely on page nodes, streamlining searches in page-heavy repositories.
@@ -56,6 +57,7 @@ The **Update Tab** is where the magic happens— bulk node manipulation at your 
 - **Operation Modes:** Choose from four operations via a dropdown, each tailored to common AEM tasks:
   - **Add/Update Properties:** Set or update properties on matching nodes. Supports single values (`key=value`) or arrays (`key=[val1,val2]`), with optional filters by property or node name.
   - **Replace Properties:** Find and replace property values (e.g., swap `oldValue` for `newValue` in `jcr:title`) with pinpoint accuracy.
+    - **Partial Match:** _(optional)_ Searches for property values containing the “Find Value” text anywhere within them, and replaces only the matched portion while leaving the rest of the property value unchanged. Works similarly to Substring Match in the Search tab, but applies changes instead of just filtering results.
   - **Copy:** Move nodes or properties with three flavors:
     - **Node:** Copy a node to a new location (e.g., `node1` to `node2`).
     - **Property:** Duplicate a property within a node (e.g., `propName` to `newProp`).
