@@ -36,6 +36,7 @@
     function init() {
         let lastSearchResults = []
         const $matchPropCheckbox = $('#matchProperty');
+        const $substringMatchWrapper = $('#substring-match-wrapper')
         const $propNameWrapper = $('#property-name-wrapper');
         const $queryField = $('#query-field');
         const $queryLabel = $('#query-label');
@@ -43,6 +44,7 @@
         // Search tab: Toggle Property Name Field and Relabel Query
         $matchPropCheckbox.on('change', function() {
             const isChecked = $(this).prop('checked');
+            $substringMatchWrapper.toggleClass('visible', isChecked)
             $propNameWrapper.toggleClass('visible', isChecked);
             $queryLabel.text(isChecked ? 'Property Value' : 'Search for Node');
             $queryField.attr('placeholder', isChecked ? 'Enter property value' : 'Enter node name (e.g. mynode_*)')
@@ -64,6 +66,7 @@
             }
             const matchProp = $matchPropCheckbox.prop('checked');
             const propName = $('#property-name-field').val();
+            const substringMatch = $("coral-checkbox[name='substringMatch']").prop('checked')
             const pageOnly = $("coral-checkbox[name='pageOnly']").prop('checked');
             const verbose = $("coral-checkbox[name='verbose']").prop('checked');
             const propertiesInput = $('#properties-field').val()
@@ -75,7 +78,11 @@
             }
             if (query) {
                 if (matchProp && propName) {
-                    url += '&property=' + encodeURIComponent(propName) + '&property.value=' + encodeURIComponent(query)
+                    let queryValue = substringMatch ? encodeURIComponent('%' + query + '%') : encodeURIComponent(query)
+                    url += '&property=' + encodeURIComponent(propName) + '&property.value=' + queryValue
+                    if (substringMatch) {
+                        url += '&property.operation=like'
+                    }
                 } else {
                     url += '&nodename=' + encodeURIComponent(query)
                 }

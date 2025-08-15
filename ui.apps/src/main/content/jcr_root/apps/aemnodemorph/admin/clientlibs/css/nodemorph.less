@@ -12,8 +12,16 @@
 
     coral-panel-content {
 
-        #matchProperty {
+        #matchProperty, #substringMatch {
             width: 100%;
+        }
+
+        #substring-match-wrapper {
+            visibility: hidden;
+
+            &.visible {
+                visibility: visible;
+            }
         }
 
         .nodemorph-form {
@@ -294,6 +302,10 @@
                 margin-bottom: 1rem;
                 margin-right: 1rem;
             }
+        }
+
+        .w-12 {
+            width: 24rem;
         }
     }
 }

@@ -73,7 +73,18 @@
                                                         </span>
                                                     </div>
                                                     <div class="coral-table-row">
-                                                        <coral-checkbox value="on" name="matchProperty" id="matchProperty">Match Property</coral-checkbox>
+                                                        <div class="coral-table-column">
+                                                            <div class="coral-Form-fieldwrapper w-12">
+                                                            <coral-checkbox value="on" name="matchProperty" id="matchProperty">Match Property</coral-checkbox>
+                                                            <div id="substring-match-wrapper" class="label-wrapper checkbox-wrapper">
+                                                                <coral-checkbox value="on" name="substringMatch" id="substringMatch">Substring Match</coral-checkbox>
+                                                                <coral-icon icon="help" size="S"></coral-icon>
+                                                                <coral-tooltip placement="left" target="_prev">
+                                                                    Match results where the Property Value contains the text entered, instead of matching it exactly
+                                                                </coral-tooltip>
+                                                            </div>
+                                                                </div>
+                                                        </div>
                                                         <div class="coral-table-column">
                                                             <div class="match-property-container">
                                                                 <div class="coral-Form-fieldwrapper" id="property-name-wrapper">
